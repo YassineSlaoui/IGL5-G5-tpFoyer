@@ -1,0 +1,38 @@
+provider "aws" {
+  region = var.aws_region
+}
+
+resource "aws_eks_cluster" "my_cluster" {
+  name     = var.cluster_name
+  role_arn = var.role_arn
+  version  = "1.30"
+
+  vpc_config {
+    subnet_ids = var.subnet_ids
+  }
+}
+
+resource "aws_security_group_rule" "allow_all_inbound_on_8082" {
+  type              = "ingress"
+  from_port         = 8082
+  to_port           = 8082
+  protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = aws_eks_cluster.my_cluster.vpc_config[0].cluster_security_group_id
+  depends_on = [aws_eks_cluster.my_cluster]
+}
+
+resource "aws_eks_node_group" "my_node_group" {
+  cluster_name    = aws_eks_cluster.my_cluster.name
+  node_group_name = "${var.cluster_name}-ng"
+  node_role_arn   = var.role_arn
+  subnet_ids      = var.subnet_ids
+
+  scaling_config {
+    desired_size = 3
+    max_size     = 6
+    min_size     = 3
+  }
+
+  depends_on = [aws_eks_cluster.my_cluster]
+}

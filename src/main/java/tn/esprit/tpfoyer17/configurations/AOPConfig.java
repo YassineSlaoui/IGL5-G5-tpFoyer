@@ -21,7 +21,7 @@ public class AOPConfig {
 		Date start = new Date();
 		Object obj = pjp.proceed();
 		int time = new Date().compareTo(start);
-		log.info("temps d'execution = "+time);
+        log.info("temps d'execution = {}", time);
 		return obj;
 	}
 
