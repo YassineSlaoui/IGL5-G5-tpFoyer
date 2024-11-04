@@ -159,7 +159,7 @@ pipeline {
                     sh """
                     aws eks update-kubeconfig --region ${region} --name ${clusterName}
                     kubectl apply -f mysql-secret.yaml
-                    kubectl apply -f db-config.yaml
+                    kubectl apply -f mysql-configMap.yaml
                     kubectl apply -f db-deployment.yaml
                     kubectl apply -f app-deployment.yaml
                     """
