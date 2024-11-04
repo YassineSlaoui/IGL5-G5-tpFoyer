@@ -57,7 +57,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'whoami'
                     echo 'Building Docker image...'
                     dockerImage = docker.build("${registry.toLowerCase()}:latest")
                 }
