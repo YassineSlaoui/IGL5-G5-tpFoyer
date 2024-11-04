@@ -15,7 +15,7 @@ pipeline {
         stage('Checkout Git') {
             steps {
                 echo 'Cloning Git repository...'
-                git branch: 'main', url: 'https://github.com/YassineSlaoui/IGL5-G5-tpFoyer'
+                git branch: 'feature/ys-adding-jenkinsfile-dockerfile-k8s', url: 'https://github.com/YassineSlaoui/IGL5-G5-tpFoyer'
             }
         }
 
