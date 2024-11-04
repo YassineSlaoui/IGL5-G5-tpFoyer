@@ -12,13 +12,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout Git') {
-            steps {
-                echo 'Cloning Git repository...'
-                git branch: 'feature/ys-adding-jenkinsfile-dockerfile-k8s', url: 'https://github.com/YassineSlaoui/IGL5-G5-tpFoyer'
-            }
-        }
-
         stage('Maven Clean') {
             steps {
                 echo 'Cleaning the project...'
