@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tpFoyer-springboot-deployment
+  name: tpfoyer-springboot-deployment
 spec:
   selector:
     matchLabels:
-      app: tpFoyer-springboot
+      app: tpfoyer-springboot
   replicas: 2
   template:
     metadata:
       labels:
-        app: tpFoyer-springboot
+        app: tpfoyer-springboot
     spec:
       containers:
-        - name: tpFoyer-springboot-k8s
-          image: dfcn0/tpFoyer-springboot:latest
+        - name: tpfoyer-springboot-k8s
+          image: dfcn0/tpfoyer-springboot:latest
           ports:
             - containerPort: 8082
           env:   # Setting Environment Variables
@@ -47,10 +47,10 @@ spec:
 apiVersion: v1 # Kubernetes API version
 kind: Service # Kubernetes resource kind we are creating
 metadata: # Metadata of the resource kind we are creating
-  name: tpFoyer-springboot-svc
+  name: tpfoyer-springboot-svc
 spec:
   selector:
-    app: tpFoyer-springboot
+    app: tpfoyer-springboot
   ports:
     - protocol: "TCP"
       port: 8082 # The port that the service is running on in the cluster
