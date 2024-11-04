@@ -58,7 +58,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    dockerImage = docker.build("${registry}:latest")
+                    dockerImage = docker.build("${registry.toLowerCase()}:latest")
                 }
             }
         }
