@@ -158,7 +158,7 @@ pipeline {
                     // Use the kubeconfig securely without string interpolation
                     sh """
                     aws eks update-kubeconfig --region ${region} --name ${clusterName}
-                    kubectl apply -f mysql-secret.yaml
+                    kubectl apply -f mysql-secrets.yaml
                     kubectl apply -f mysql-configMap.yaml
                     kubectl apply -f db-deployment.yaml
                     kubectl apply -f app-deployment.yaml
