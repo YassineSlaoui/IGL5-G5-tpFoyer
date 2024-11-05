@@ -4,7 +4,6 @@ pipeline {
     environment {
         registry = "mimi019/docker-spring-boot"
         registryCredential = 'dockerhub_credentials'
-        sonarqubeCredential = 'sonarqube_credentials'
         awsCredentialsId = 'aws_credentials'
         dockerImage = ''
         region = 'us-east-1'
@@ -57,7 +56,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running SonarQube analysis...'
-                    withCredentials([usernamePassword(credentialsId: sonarqubeCredential, usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'SonarQube_credentials', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASSWORD')]) {
                         sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER -Dsonar.password=$SONAR_PASSWORD'
                     }
                 }
