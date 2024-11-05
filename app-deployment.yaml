@@ -44,17 +44,15 @@ spec:
 
 ---
 
-apiVersion: v1 # Kubernetes API version
-kind: Service # Kubernetes resource kind we are creating
-metadata: # Metadata of the resource kind we are creating
+apiVersion: v1
+kind: Service
+metadata:
   name: tpfoyer-springboot-svc
 spec:
   selector:
     app: tpfoyer-springboot
   ports:
     - protocol: "TCP"
-      port: 8082 # The port that the service is running on in the cluster
-      targetPort: 8082 # The port exposed by the service
-      nodePort: 30000 # The port that the service is running on in the cluster
-  type: NodePort # type of the service.
-
+      port: 8082
+      targetPort: 8082
+  type: LoadBalancer
