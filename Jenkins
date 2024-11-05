@@ -5,7 +5,8 @@ pipeline {
         registry = "mimi019/docker-spring-boot"
         awsCredentialsId = 'aws_credentials'
         dockerImage = ''
-        region = 'us-east-1'
+        AWS_REGION = 'us-east-1' // or your desired region
+        CLUSTER_NAME = 'spring-cluster' // your EKS cluster name
 
     }
 
@@ -135,20 +136,44 @@ pipeline {
                                 env.ROLE_ARN = sh(script: "aws iam list-roles --query 'Roles[?RoleName==`LabRole`].Arn' --output text", returnStdout: true).trim()
                                 echo "Retrieved Role ARN: ${env.ROLE_ARN}"
 
-                                // Retrieve VPC ID
-                                env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[0].VpcId' --output text", returnStdout: true).trim()
-                                echo "Retrieved VPC ID: ${env.VPC_ID}"
 
-
-                                // Retrieve Subnet IDs
-                                def subnetIds = sh(script: "aws ec2 describe-subnets --region ${region} --filters Name=vpc-id,Values=${env.VPC_ID} Name=availability-zone,Values=us-east-1a,us-east-1b --query 'Subnets[*].SubnetId' --output text", returnStdout: true).trim().split()
-                                env.SUBNET_ID_A = subnetIds[0]
-                                env.SUBNET_ID_B = subnetIds[1]
-                                echo "Retrieved Subnet IDs: ${env.SUBNET_ID_A}, ${env.SUBNET_ID_B}"
                             }
                         }
                     }
                 }
+                stage('Initialize Terraform') {
+                    steps {
+                        dir('terraform') {
+                            sh 'terraform init'
+                        }
+                    }
+                }
+                stage('Plan Terraform') {
+                    steps {
+                        dir('terraform') {
+                            sh 'terraform plan -out=tfplan'
+                        }
+                    }
+                }
+                stage('Apply Terraform') {
+                    steps {
+                        dir('Terraform') {
+                            sh 'terraform apply -auto-approve tfplan'
+                        }
+                    }
+                }
+                stage('Deploy to EKS') {
+                    steps {
+                        // Set up kubectl with EKS cluster
+                        sh 'aws eks --region ${env.AWS_REGION} update-kubeconfig --name ${env.CLUSTER_NAME}'
+
+                        // Apply Kubernetes configuration
+                        sh 'kubectl apply -f kubernetes/'
+                    }
+                }
+
+
+
 
 
 
