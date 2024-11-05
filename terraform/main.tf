@@ -12,10 +12,10 @@ resource "aws_eks_cluster" "my_cluster" {
   }
 }
 
-resource "aws_security_group_rule" "allow_all_inbound_on_8082" {
+resource "aws_security_group_rule" "allow_all_inbound_on_30000" {
   type              = "ingress"
-  from_port         = 8082
-  to_port           = 8082
+  from_port         = 30000
+  to_port           = 30000
   protocol          = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
   security_group_id = aws_eks_cluster.my_cluster.vpc_config[0].cluster_security_group_id
@@ -29,9 +29,9 @@ resource "aws_eks_node_group" "my_node_group" {
   subnet_ids      = var.subnet_ids
 
   scaling_config {
-    desired_size = 3
-    max_size     = 6
-    min_size     = 3
+    desired_size = 2
+    max_size     = 4
+    min_size     = 1
   }
 
   depends_on = [aws_eks_cluster.my_cluster]
