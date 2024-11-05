@@ -1,16 +1,18 @@
-# StorageClass for Dynamic Provisioning
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
+apiVersion: v1
+kind: PersistentVolume
 metadata:
-  name: standard
-provisioner: kubernetes.io/aws-ebs
-parameters:
-  type: gp2
-  fsType: ext4
-
+  name: mysql-pv
+  labels:
+    app: mysql
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data"
 ---
-
-# PersistentVolumeClaim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -24,11 +26,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard
-
 ---
-
-# MySQL Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -73,10 +71,7 @@ spec:
         - name: mysql-persistent-storage
           persistentVolumeClaim:
             claimName: mysql-pv-claim
-
 ---
-
-# MySQL Service
 apiVersion: v1
 kind: Service
 metadata:
