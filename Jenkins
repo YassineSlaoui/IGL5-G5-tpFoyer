@@ -68,11 +68,12 @@ pipeline {
                 script {
                     echo 'Publishing artifacts to Nexus...'
                     withCredentials([usernamePassword(credentialsId: 'Nexus_credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
-                        sh 'mvn deploy -DrepositoryId=deploymentRepo -Dnexus.user=$NEXUS_USER -Dnexus.password=$NEXUS_PASSWORD'
+                        sh 'mvn deploy -s /var/jenkins_home/.m2/settings.xml'
                     }
                 }
             }
         }
+
 
 
         stage('Build Docker Image') {
