@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         registry = "mimi019/docker-spring-boot"
-        registryCredential = 'dockerhub_credentials'
         awsCredentialsId = 'aws_credentials'
         dockerImage = ''
         region = 'us-east-1'
@@ -89,7 +88,7 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying Docker image to Docker Hub...'
-                    docker.withRegistry('https://registry.hub.docker.com', registryCredential) {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub') {
                         dockerImage.push()
                     }
                 }
