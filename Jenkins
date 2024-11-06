@@ -143,7 +143,7 @@ pipeline {
                     # Check if the VPC exists
                     if check_vpc_exists $VPC_ID; then
                       echo "VPC $VPC_ID exists. Importing into Terraform state..."
-                      terraform import aws_vpc.my_vpc $VPC_ID
+                      terraform -chdir=Terraform import aws_vpc.my_vpc $VPC_ID
                     else
                       echo "VPC $VPC_ID does not exist. Skipping import."
                     fi
