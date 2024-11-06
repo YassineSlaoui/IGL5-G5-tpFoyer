@@ -123,6 +123,19 @@ pipeline {
                         echo "Retrieved Role ARN: ${env.ROLE_ARN}"
                         env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[1].VpcId' --output text", returnStdout: true).trim()
                         echo "Retrieved VPC ID: ${env.VPC_ID}"
+
+                        // Retrieve Internet Gateway ID
+                        env.IGW_ID = sh(script: "aws ec2 describe-internet-gateways --region ${region} --query 'InternetGateways[0].InternetGatewayId' --output text", returnStdout: true).trim()
+                        echo "Retrieved Internet Gateway ID: ${env.IGW_ID}"
+
+                        // Retrieve Public Subnet ID
+                        env.PUBLIC_SUBNET_ID = sh(script: "aws ec2 describe-subnets --region ${region} --filters 'Name=vpc-id,Values=${env.VPC_ID}' 'Name=tag:Name,Values=public-subnet' --query 'Subnets[0].SubnetId' --output text", returnStdout: true).trim()
+                        echo "Retrieved Public Subnet ID: ${env.PUBLIC_SUBNET_ID}"
+
+                        // Retrieve Private Subnet ID
+                        env.PRIVATE_SUBNET_ID = sh(script: "aws ec2 describe-subnets --region ${region} --filters 'Name=vpc-id,Values=${env.VPC_ID}' 'Name=tag:Name,Values=private-subnet' --query 'Subnets[1].SubnetId' --output text", returnStdout: true).trim()
+                        echo "Retrieved Private Subnet ID: ${env.PRIVATE_SUBNET_ID}"
+
                     }
                 }
             }
@@ -132,21 +145,59 @@ pipeline {
                 script {
                     sh '''
                     #!/bin/bash
-
+        
                     # Function to check if a VPC exists
                     check_vpc_exists() {
                       vpc_id=$1
                       aws ec2 describe-vpcs --vpc-ids $vpc_id > /dev/null 2>&1
                       return $?
                     }
-
+        
+                    # Function to check if an Internet Gateway exists
+                    check_igw_exists() {
+                      igw_id=$1
+                      aws ec2 describe-internet-gateways --internet-gateway-ids $igw_id > /dev/null 2>&1
+                      return $?
+                    }
+        
+                    # Function to check if a Subnet exists
+                    check_subnet_exists() {
+                      subnet_id=$1
+                      aws ec2 describe-subnets --subnet-ids $subnet_id > /dev/null 2>&1
+                      return $?
+                    }
+        
                     # Check if the VPC exists
                     if check_vpc_exists $VPC_ID; then
-                      echo "VPC $VPC_ID exists. Importing into Terraform state..."
+                      echo "VPC $VPC_ID exists. Initializing Terraform and importing into state..."
                       terraform -chdir=Terraform init
                       terraform -chdir=Terraform import aws_vpc.my_vpc $VPC_ID
                     else
                       echo "VPC $VPC_ID does not exist. Skipping import."
+                    fi
+        
+                    # Check if the Internet Gateway exists
+                    if check_igw_exists $IGW_ID; then
+                      echo "Internet Gateway $IGW_ID exists. Importing into Terraform state..."
+                      terraform -chdir=Terraform import aws_internet_gateway.igw $IGW_ID
+                    else
+                      echo "Internet Gateway $IGW_ID does not exist. Skipping import."
+                    fi
+        
+                    # Check if the Public Subnet exists
+                    if check_subnet_exists $PUBLIC_SUBNET_ID; then
+                      echo "Public Subnet $PUBLIC_SUBNET_ID exists. Importing into Terraform state..."
+                      terraform -chdir=Terraform import aws_subnet.public_subnet $PUBLIC_SUBNET_ID
+                    else
+                      echo "Public Subnet $PUBLIC_SUBNET_ID does not exist. Skipping import."
+                    fi
+        
+                    # Check if the Private Subnet exists
+                    if check_subnet_exists $PRIVATE_SUBNET_ID; then
+                      echo "Private Subnet $PRIVATE_SUBNET_ID exists. Importing into Terraform state..."
+                      terraform -chdir=Terraform import aws_subnet.private_subnet $PRIVATE_SUBNET_ID
+                    else
+                      echo "Private Subnet $PRIVATE_SUBNET_ID does not exist. Skipping import."
                     fi
                     '''
                 }
