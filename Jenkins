@@ -120,6 +120,8 @@ pipeline {
                         // Retrieve role_arn
                         env.ROLE_ARN = sh(script: "aws iam list-roles --query 'Roles[?RoleName==`LabRole`].Arn' --output text", returnStdout: true).trim()
                         echo "Retrieved Role ARN: ${env.ROLE_ARN}"
+                        env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[1].VpcId' --output text", returnStdout: true).trim()
+
                     }
                 }
             }
@@ -136,9 +138,6 @@ pipeline {
                       aws ec2 describe-vpcs --vpc-ids $vpc_id > /dev/null 2>&1
                       return $?
                     }
-
-                    # VPC ID to import
-                    VPC_ID="vpc-12345678"
 
                     # Check if the VPC exists
                     if check_vpc_exists $VPC_ID; then
@@ -165,7 +164,7 @@ pipeline {
                 }
             }
         }
-        stage('Initialize, Validate, and Apply Terraform') {
+        stage('Apply Terraform') {
             steps {
                 dir('Terraform') {
                     sh 'terraform apply -auto-approve'
