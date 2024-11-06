@@ -70,20 +70,16 @@ public class ReservationService implements IReservationService{
             }
             return reservationRepository.save(reservation);
         } else {
-            List<Etudiant> etudiants = new ArrayList<Etudiant>();
+            List<Etudiant> etudiants = new ArrayList<>();
             etudiants.add(etudiantRepository.findByCinEtudiant(cinEtudiant));
-            Reservation reservation = Reservation.builder().anneeUniversitaire(new Date()).etudiants((Set<Etudiant>) etudiants).build();
+            Reservation reservation = Reservation.builder().anneeUniversitaire(new Date()).etudiants(new HashSet<>(etudiants)).build();
             Chambre chambre = chambreRepository.getForReservation(idBloc);
             Bloc bloc =blocRepository.findById(idBloc).get();
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
             String idReservation = chambre.getIdChambre()+bloc.getNomBloc()+calendar.get(Calendar.YEAR);
             reservation.setIdReservation(idReservation);
-            if (chambre.getTypeChambre().equals(TypeChambre.SIMPLE)){
-                reservation.setEstValide(false);
-            }else {
-                reservation.setEstValide(true);
-            }
+            reservation.setEstValide(!chambre.getTypeChambre().equals(TypeChambre.SIMPLE));
 
         return reservationRepository.save(reservation);
         }
