@@ -162,15 +162,15 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Cleaning up...'
-            cleanWs()
+         always {
+            emailext attachLog: true,
+                subject: "'${currentBuild.result}'",
+                body: "Project: ${env.JOB_NAME}<br/>" +
+                    "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                    "URL: ${env.BUILD_URL}<br/>",
+                to: 'moula.meriame@gmail.com',
+                attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+            }
         }
-        success {
-            echo 'Pipeline completed successfully!'
         }
-        failure {
-            echo 'Pipeline failed. Check logs for details.'
-        }
-    }
 }
