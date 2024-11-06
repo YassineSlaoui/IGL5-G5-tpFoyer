@@ -169,8 +169,7 @@ pipeline {
                     "Build Number: ${env.BUILD_NUMBER}<br/>" +
                     "URL: ${env.BUILD_URL}<br/>",
                 to: 'moula.meriame@gmail.com',
-                attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+                mimeType: 'text/html'
             }
-        }
         }
 }
