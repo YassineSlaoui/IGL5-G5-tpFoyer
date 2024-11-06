@@ -148,7 +148,7 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 // Set up kubectl with EKS cluster
-                sh 'aws eks --region ${env.AWS_REGION} update-kubeconfig --name ${env.CLUSTER_NAME}'
+                sh 'aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}'
 
                 // Apply the ConfigMap and Secret first to make sure environment variables are available
                 sh 'kubectl apply -f kubernetes/mysql-configMap.yaml'
