@@ -131,10 +131,10 @@ pipeline {
                 }
             }
         }
-        stage('Plan Terraform') {
+        stage('Validate Terraform') {
             steps {
                 dir('terraform') {
-                    sh 'terraform plan -out=tfplan'
+                    sh 'terraform validate'
                 }
             }
         }
