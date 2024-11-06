@@ -17,9 +17,13 @@ spec:
           image: mysql:5.7
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: "your_root_password"
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secrets
+                  key: root_password
           ports:
             - containerPort: 3306
+
 ---
 apiVersion: v1
 kind: Service
@@ -30,3 +34,4 @@ spec:
     - port: 3306
   selector:
     app: mysql
+

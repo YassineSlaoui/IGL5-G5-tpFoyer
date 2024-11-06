@@ -18,7 +18,29 @@ spec:
         - name: spring-app
           image: mimi019/docker-spring-boot
           ports:
-            - containerPort: 8080
+            - containerPort: 8082
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-config
+                  key: db_host
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-config
+                  key: db_name
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secrets
+                  key: db_username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secrets
+                  key: db_password
+
 ---
 apiVersion: v1
 kind: Service
@@ -28,6 +50,7 @@ spec:
   type: LoadBalancer
   ports:
     - port: 80
-      targetPort: 8080
+      targetPort: 8082
   selector:
     app: spring
+
