@@ -1,17 +1,20 @@
 variable "aws_region" {
-  description = "The AWS region to deploy to"
+  description = "AWS Region"
   type        = string
   default     = "us-east-1"
 }
 
-variable "vpc_cidr" {
-  description = "The CIDR block for the VPC"
+variable "cluster_name" {
+  description = "EKS Cluster Name"
   type        = string
-  default     = "10.0.0.0/16"
 }
 
-variable "cluster_name" {
-  description = "The name of the EKS cluster"
+variable "subnet_ids" {
+  description = "Subnet IDs"
+  type        = list(string)
+}
+
+variable "role_arn" {
+  description = "IAM Role ARN for EKS"
   type        = string
-  default     = "my-cluster"
 }
