@@ -7,6 +7,7 @@ pipeline {
         dockerImage = ''
         AWS_REGION = 'us-east-1' // or your desired region
         CLUSTER_NAME = 'spring-cluster' // your EKS cluster name
+        region = 'us-east-1'
     }
 
     stages {
