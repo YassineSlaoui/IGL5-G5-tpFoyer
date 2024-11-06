@@ -121,7 +121,7 @@ pipeline {
                         env.ROLE_ARN = sh(script: "aws iam list-roles --query 'Roles[?RoleName==`LabRole`].Arn' --output text", returnStdout: true).trim()
                         echo "Retrieved Role ARN: ${env.ROLE_ARN}"
                         env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[1].VpcId' --output text", returnStdout: true).trim()
-
+                        echo "Retrieved VPC ID: ${env.VPC_ID}"
                     }
                 }
             }
