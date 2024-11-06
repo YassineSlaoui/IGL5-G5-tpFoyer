@@ -124,24 +124,28 @@ pipeline {
                 }
             }
         }
-        stage('Initialize Terraform') {
+//        stage('Initialize Terraform') {
+//            steps {
+//                dir('Terraform') {
+//                    sh 'terraform init'
+//                }
+//            }
+//        }
+//        stage('Validate Terraform') {
+//            steps {
+//                dir('Terraform') {
+//                    sh 'terraform validate'
+//                }
+//            }
+//        }
+        stage('Initialize, Validate, and Apply Terraform') {
             steps {
                 dir('Terraform') {
-                    sh 'terraform init'
-                }
-            }
-        }
-        stage('Validate Terraform') {
-            steps {
-                dir('Terraform') {
-                    sh 'terraform validate'
-                }
-            }
-        }
-        stage('Apply Terraform') {
-            steps {
-                dir('Terraform') {
-                    sh 'terraform apply -auto-approve'
+                    sh '''
+                        terraform init
+                        terraform validate
+                        terraform apply -auto-approve
+                    '''
                 }
             }
         }
@@ -161,36 +165,36 @@ pipeline {
 
     }
 
-   post {
-       always {
-           emailext attachLog: true,
-               subject: "'${currentBuild.result}' - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-               body: "Project: ${env.JOB_NAME}<br/>" +
-                   "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                   "URL: ${env.BUILD_URL}<br/>" +
-                   "Result: ${currentBuild.result}<br/>",
-               to: 'moula.meriame@gmail.com',
-               mimeType: 'text/html'
-       }
-       success {
-           emailext attachLog: true,
-               subject: "SUCCESS - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-               body: "Project: ${env.JOB_NAME}<br/>" +
-                   "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                   "URL: ${env.BUILD_URL}<br/>" +
-                   "Result: SUCCESS<br/>",
-               to: 'moula.meriame@gmail.com',
-               mimeType: 'text/html'
-       }
-       failure {
-           emailext attachLog: true,
-               subject: "FAILURE - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-               body: "Project: ${env.JOB_NAME}<br/>" +
-                   "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                   "URL: ${env.BUILD_URL}<br/>" +
-                   "Result: FAILURE<br/>",
-               to: 'moula.meriame@gmail.com',
-               mimeType: 'text/html'
-       }
-   }
+    post {
+        always {
+            emailext attachLog: true,
+                    subject: "'${currentBuild.result}' - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                    body: "Project: ${env.JOB_NAME}<br/>" +
+                            "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                            "URL: ${env.BUILD_URL}<br/>" +
+                            "Result: ${currentBuild.result}<br/>",
+                    to: 'moula.meriame@gmail.com',
+                    mimeType: 'text/html'
+        }
+        success {
+            emailext attachLog: true,
+                    subject: "SUCCESS - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                    body: "Project: ${env.JOB_NAME}<br/>" +
+                            "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                            "URL: ${env.BUILD_URL}<br/>" +
+                            "Result: SUCCESS<br/>",
+                    to: 'moula.meriame@gmail.com',
+                    mimeType: 'text/html'
+        }
+        failure {
+            emailext attachLog: true,
+                    subject: "FAILURE - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                    body: "Project: ${env.JOB_NAME}<br/>" +
+                            "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                            "URL: ${env.BUILD_URL}<br/>" +
+                            "Result: FAILURE<br/>",
+                    to: 'moula.meriame@gmail.com',
+                    mimeType: 'text/html'
+        }
+    }
 }
