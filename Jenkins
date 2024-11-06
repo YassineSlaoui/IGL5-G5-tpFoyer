@@ -124,28 +124,51 @@ pipeline {
                 }
             }
         }
-//        stage('Initialize Terraform') {
-//            steps {
-//                dir('Terraform') {
-//                    sh 'terraform init'
-//                }
-//            }
-//        }
-//        stage('Validate Terraform') {
-//            steps {
-//                dir('Terraform') {
-//                    sh 'terraform validate'
-//                }
-//            }
-//        }
+        stage('Conditional Terraform Import') {
+            steps {
+                script {
+                    sh '''
+                    #!/bin/bash
+
+                    # Function to check if a VPC exists
+                    check_vpc_exists() {
+                      vpc_id=$1
+                      aws ec2 describe-vpcs --vpc-ids $vpc_id > /dev/null 2>&1
+                      return $?
+                    }
+
+                    # VPC ID to import
+                    VPC_ID="vpc-12345678"
+
+                    # Check if the VPC exists
+                    if check_vpc_exists $VPC_ID; then
+                      echo "VPC $VPC_ID exists. Importing into Terraform state..."
+                      terraform import aws_vpc.my_vpc $VPC_ID
+                    else
+                      echo "VPC $VPC_ID does not exist. Skipping import."
+                    fi
+                    '''
+                }
+            }
+        }
+        stage('Initialize Terraform') {
+            steps {
+                dir('Terraform') {
+                    sh 'terraform init'
+                }
+            }
+        }
+        stage('Validate Terraform') {
+            steps {
+                dir('Terraform') {
+                    sh 'terraform validate'
+                }
+            }
+        }
         stage('Initialize, Validate, and Apply Terraform') {
             steps {
                 dir('Terraform') {
-                    sh '''
-                        terraform init
-                        terraform validate
-                        terraform apply -auto-approve
-                    '''
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
