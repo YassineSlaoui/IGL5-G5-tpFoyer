@@ -167,11 +167,12 @@ pipeline {
                 sh 'aws eks --region ${AWS_REGION} update-kubeconfig --name ${clusterName}'
 
                 // Apply the ConfigMap and Secret first to make sure environment variables are available
-                sh 'kubectl apply -f kubernetes/mysql-configMap.yaml'
-                sh 'kubectl apply -f kubernetes/mysql-secrets.yaml'
+                sh 'kubectl apply -f mysql-configMap.yaml'
+                sh 'kubectl apply -f mysql-secrets.yaml'
 
                 // Apply remaining Kubernetes configurations for the application and database deployments
-                sh 'kubectl apply -f kubernetes/'
+                sh 'kubectl apply -f deployment-mysql.yaml'
+                sh 'kubectl apply -f deployment.yaml'
             }
         }
 
