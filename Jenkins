@@ -152,7 +152,7 @@ pipeline {
 
                     // Apply the configuration changes
                     sh """
-                        terraform -chdir=terraform apply -auto-approve \
+                        terraform -chdir=Terraform apply -auto-approve \
                             -var aws_region=${region} \
                             -var cluster_name=${clusterName} \
                             -var role_arn=${env.ROLE_ARN} \
