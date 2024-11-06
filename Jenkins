@@ -126,21 +126,21 @@ pipeline {
         }
         stage('Initialize Terraform') {
             steps {
-                dir('terraform') {
+                dir('Terraform') {
                     sh 'terraform init'
                 }
             }
         }
         stage('Validate Terraform') {
             steps {
-                dir('terraform') {
+                dir('Terraform') {
                     sh 'terraform validate'
                 }
             }
         }
         stage('Apply Terraform') {
             steps {
-                dir('terraform') {
+                dir('Terraform') {
                     sh 'terraform apply -auto-approve'
                 }
             }
