@@ -6,18 +6,11 @@ pipeline {
         awsCredentialsId = 'aws_credentials'
         dockerImage = ''
         AWS_REGION = 'us-east-1' // or your desired region
-        clusterName = 'spring-cluster' // your EKS cluster name
+        CLUSTER_NAME = 'spring-cluster' // your EKS cluster name
         region = 'us-east-1'
     }
 
     stages {
-
-        stage('Checkout Git') {
-            steps {
-                echo 'Checking out code from Git...'
-                git branch: 'feature/MariemMoula', url: 'https://github.com/YassineSlaoui/IGL5-G5-tpFoyer.git'
-            }
-        }
         stage('Maven Clean') {
             steps {
                 script {
@@ -95,68 +88,70 @@ pipeline {
                         echo "AWS Credentials File Loaded"
 
                         // Test AWS Credentials
-                        sh 'aws sts get-caller-identity' // Ensure AWS CLI can access the credentials
+                        sh '''
+                        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                        aws configure set aws_session_token $AWS_SESSION_TOKEN
+                        aws sts get-caller-identity
+                        ''' // Ensure AWS CLI can access the credentials
                     }
                 }
             }
         }
-
         stage('Retrieve AWS Resources') {
             steps {
                 withCredentials([file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
                     script {
-                        def awsCredentials = readFile(AWS_CREDENTIALS_FILE).trim().split("\n")
-                        env.AWS_ACCESS_KEY_ID = awsCredentials.find { it.startsWith("aws_access_key_id") }.split("=")[1].trim()
-                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.find { it.startsWith("aws_secret_access_key") }.split("=")[1].trim()
-                        env.AWS_SESSION_TOKEN = awsCredentials.find { it.startsWith("aws_session_token") }?.split("=")[1]?.trim()
-
                         echo "AWS Access Key ID: ${env.AWS_ACCESS_KEY_ID}"
                         echo "AWS Credentials File Loaded"
 
                         // Retrieve role_arn
                         env.ROLE_ARN = sh(script: "aws iam list-roles --query 'Roles[?RoleName==`LabRole`].Arn' --output text", returnStdout: true).trim()
                         echo "Retrieved Role ARN: ${env.ROLE_ARN}"
+//                        env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[1].VpcId' --output text", returnStdout: true).trim()
+//                        echo "Retrieved VPC ID: ${env.VPC_ID}"
+//
+//                        // Retrieve Internet Gateway ID
+//                        env.IGW_ID = sh(script: "aws ec2 describe-internet-gateways --region ${region} --query 'InternetGateways[0].InternetGatewayId' --output text", returnStdout: true).trim()
+//                        echo "Retrieved Internet Gateway ID: ${env.IGW_ID}"
+//
+//                        // Retrieve Public Subnet ID
+//                        env.PUBLIC_SUBNET_ID = sh(script: "aws ec2 describe-subnets --region ${region} --filters 'Name=vpc-id,Values=${env.VPC_ID}' 'Name=tag:Name,Values=public-subnet' --query 'Subnets[0].SubnetId' --output text", returnStdout: true).trim()
+//                        echo "Retrieved Public Subnet ID: ${env.PUBLIC_SUBNET_ID}"
+//
+//                        // Retrieve Private Subnet ID
+//                        env.PRIVATE_SUBNET_ID = sh(script: "aws ec2 describe-subnets --region ${region} --filters 'Name=vpc-id,Values=${env.VPC_ID}' 'Name=tag:Name,Values=private-subnet' --query 'Subnets[1].SubnetId' --output text", returnStdout: true).trim()
+//                        echo "Retrieved Private Subnet ID: ${env.PRIVATE_SUBNET_ID}"
 
-                        // Retrieve VPC ID
-                        env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[0].VpcId' --output text", returnStdout: true).trim()
-                        echo "Retrieved VPC ID: ${env.VPC_ID}"
-
-                        // Retrieve Subnet IDs
-                        def subnetIds = sh(script: """
-                            aws ec2 describe-subnets --region ${region} \
-                            --filters Name=vpc-id,Values=${env.VPC_ID} Name=availability-zone,Values=${region}a,${region}b \
-                            --query 'Subnets[0:2].SubnetId' --output text
-                        """, returnStdout: true).trim().split()
-                        env.SUBNET_ID_A = subnetIds[0]
-                        env.SUBNET_ID_B = subnetIds[1]
-                        echo "Retrieved Subnet IDs: ${env.SUBNET_ID_A}, ${env.SUBNET_ID_B}"
                     }
                 }
             }
         }
-
-        stage('Terraform Setup') {
+        stage('Initialize Terraform') {
             steps {
-                    // Initialize Terraform
-                    sh 'terraform -chdir=Terraform init'
-
-                    // Validate Terraform configuration files
-                    sh 'terraform -chdir=Terraform validate'
-
-                    // Apply the configuration changes
-                    sh """
-                        terraform -chdir=Terraform apply -auto-approve \
-                            -var aws_region=${region} \
-                            -var cluster_name=${clusterName} \
-                            -var role_arn=${env.ROLE_ARN} \
-                            -var 'subnet_ids=[\"${env.SUBNET_ID_A}\",\"${env.SUBNET_ID_B}\"]'
-                    """
+                dir('Terraform') {
+                    sh 'terraform init'
+                }
+            }
+        }
+        stage('Validate Terraform') {
+            steps {
+                dir('Terraform') {
+                    sh 'terraform validate'
+                }
+            }
+        }
+        stage('Apply Terraform') {
+            steps {
+                dir('Terraform') {
+                    sh 'terraform apply -auto-approve'
+                }
             }
         }
         stage('Deploy to EKS') {
             steps {
                 // Set up kubectl with EKS cluster
-                sh 'aws eks --region ${AWS_REGION} update-kubeconfig --name ${clusterName}'
+                sh 'aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}'
 
                 // Apply the ConfigMap and Secret first to make sure environment variables are available
                 sh 'kubectl apply -f mysql-configMap.yaml'
