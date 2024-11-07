@@ -29,7 +29,7 @@ public class EtudiantService implements IEtudiantService{
     }
     @Override
     public Etudiant getEtudiantById(long idEtudiant) {
-        return etudiantRepository.findById(idEtudiant).get();
+        return etudiantRepository.findById(idEtudiant).orElse(null);
     }
     @Override
     public void deleteEtudiant(long idEtudiant) {

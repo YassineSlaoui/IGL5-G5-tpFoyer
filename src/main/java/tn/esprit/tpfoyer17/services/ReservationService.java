@@ -37,7 +37,7 @@ public class ReservationService implements IReservationService{
 
     @Override
     public Reservation getReservationById(String idReservation) {
-        return reservationRepository.findById(idReservation).get();
+        return reservationRepository.findById(idReservation).orElse(null);
     }
 
     @Override

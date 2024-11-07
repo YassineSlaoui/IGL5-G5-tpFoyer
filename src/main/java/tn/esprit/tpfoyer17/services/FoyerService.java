@@ -32,7 +32,7 @@ public class FoyerService implements IFoyerService{
     }
     @Override
     public Foyer getFoyerById(long idFoyer) {
-        return foyerRepository.findById(idFoyer).get();
+        return foyerRepository.findById(idFoyer).orElse(null);
     }
     @Override
     public void deleteFoyer(long idFoyer) {
