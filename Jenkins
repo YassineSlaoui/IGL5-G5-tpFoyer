@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        registry = "mimi019/docker-spring-boot"
+        registry = "dfcn0/docker-spring-boot"
         awsCredentialsId = 'aws_credentials'
         dockerImage = ''
         AWS_REGION = 'us-east-1' // or your desired region
@@ -52,7 +52,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running SonarQube analysis...'
-                    withCredentials([usernamePassword(credentialsId: 'SonarQube_credentials', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'sonarqube_credentials', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASSWORD')]) {
                         sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER -Dsonar.password=$SONAR_PASSWORD'
                     }
                 }
