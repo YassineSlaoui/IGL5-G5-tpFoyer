@@ -11,17 +11,11 @@ pipeline {
     }
 
     stages {
-        stage('Cleanup') {
-            steps {
-                cleanWs()
-            }
-        }
+
         stage('Checkout Git') {
             steps {
-                script {
-                    echo 'Checking out code from Git...'
-                    git branch: 'feature/MariemMoula', url: 'https://github.com/YassineSlaoui/IGL5-G5-tpFoyer.git'
-                }
+                echo 'Checking out code from Git...'
+                git branch: 'feature/MariemMoula', url: 'https://github.com/YassineSlaoui/IGL5-G5-tpFoyer.git'
             }
         }
         stage('Maven Clean') {
