@@ -12,38 +12,36 @@ spec:
       labels:
         app: tpfoyer-springboot
     spec:
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "${var.cluster_name}-app-ng"
       containers:
         - name: tpfoyer-springboot-k8s
           image: dfcn0/tpfoyer-springboot:latest
           ports:
             - containerPort: 8082
-          env:   # Setting Environment Variables
-            - name: DB_HOST   # Setting Database host address from configMap
-              valueFrom :
-                configMapKeyRef :
-                  name : db-config
-                  key :  host
-
-            - name: DB_NAME  # Setting Database name from configMap
-              valueFrom :
-                configMapKeyRef :
-                  name : db-config
-                  key :  dbName
-
-            - name: DB_USERNAME  # Setting Database username from Secret
-              valueFrom :
-                secretKeyRef :
-                  name : mysql-secrets
-                  key :  username
-
-            - name: DB_PASSWORD # Setting Database password from Secret
-              valueFrom :
-                secretKeyRef :
-                  name : mysql-secrets
-                  key :  password
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: host
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: dbName
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secrets
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secrets
+                  key: password
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:

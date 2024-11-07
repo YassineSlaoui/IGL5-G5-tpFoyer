@@ -74,7 +74,6 @@ pipeline {
             }
         }
 
-        // New Stage to Test AWS Credentials
         stage('Test AWS Credentials') {
             steps {
                 withCredentials([file(credentialsId: awsCredentialsId, variable: 'AWS_CREDENTIALS_FILE')]) {
@@ -84,13 +83,15 @@ pipeline {
                         env.AWS_SECRET_ACCESS_KEY = awsCredentials.find { it.startsWith("aws_secret_access_key") }.split("=")[1].trim()
                         env.AWS_SESSION_TOKEN = awsCredentials.find { it.startsWith("aws_session_token") }?.split("=")[1]?.trim()
 
+                        sh 'aws configure set aws_access_key_id ${env.AWS_ACCESS_KEY_ID}'
+                        sh 'aws configure set aws_secret_access_key ${env.AWS_SECRET_ACCESS_KEY}'
+                        sh 'aws configure set aws_session_token ${env.AWS_SESSION_TOKEN}'
+
                         echo "AWS Access Key ID: ${env.AWS_ACCESS_KEY_ID}"
-                        // Optional: echo "AWS Session Token: ${env.AWS_SESSION_TOKEN}"
 
                         echo "AWS Credentials File Loaded"
 
-                        // Test AWS Credentials
-                        sh 'aws sts get-caller-identity' // Ensure AWS CLI can access the credentials
+                        sh 'aws sts get-caller-identity'
                     }
                 }
             }
@@ -107,24 +108,6 @@ pipeline {
 
                         echo "AWS Access Key ID: ${env.AWS_ACCESS_KEY_ID}"
                         echo "AWS Credentials File Loaded"
-
-                        // Retrieve role_arn
-                        env.ROLE_ARN = sh(script: "aws iam list-roles --query 'Roles[?RoleName==`LabRole`].Arn' --output text", returnStdout: true).trim()
-                        echo "Retrieved Role ARN: ${env.ROLE_ARN}"
-
-                        // Retrieve VPC ID
-                        env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[0].VpcId' --output text", returnStdout: true).trim()
-                        echo "Retrieved VPC ID: ${env.VPC_ID}"
-
-                        // Retrieve Subnet IDs
-                        def subnetIds = sh(script: """
-                            aws ec2 describe-subnets --region ${region} \
-                            --filters Name=vpc-id,Values=${env.VPC_ID} Name=availability-zone,Values=${region}a,${region}b \
-                            --query 'Subnets[0:2].SubnetId' --output text
-                        """, returnStdout: true).trim().split()
-                        env.SUBNET_ID_A = subnetIds[0]
-                        env.SUBNET_ID_B = subnetIds[1]
-                        echo "Retrieved Subnet IDs: ${env.SUBNET_ID_A}, ${env.SUBNET_ID_B}"
                     }
                 }
             }
@@ -133,40 +116,56 @@ pipeline {
         stage('Terraform Setup') {
             steps {
                 script {
-                    // Initialize Terraform
                     sh 'terraform -chdir=terraform init'
 
-                    // Validate Terraform configuration files
                     sh 'terraform -chdir=terraform validate'
 
-                    // Apply the configuration changes
-                    sh """
-                        terraform -chdir=terraform apply -auto-approve \
-                            -var aws_region=${region} \
-                            -var cluster_name=${clusterName} \
-                            -var role_arn=${env.ROLE_ARN} \
-                            -var 'subnet_ids=[\"${env.SUBNET_ID_A}\",\"${env.SUBNET_ID_B}\"]'
-                    """
+                    sh '''
+                    terraform -chdir=terraform apply -auto-approve \
+                        -var aws_region=${region} \
+                        -var cluster_name=${clusterName}
+                    '''
                 }
             }
         }
 
-        // New Stage to Deploy on AWS Kubernetes (EKS)
         stage('Deploy to AWS Kubernetes (EKS)') {
             steps {
                 script {
-                    // Use the kubeconfig securely without string interpolation
+                    // Update kubeconfig to interact with the EKS cluster
                     sh """
                     aws eks update-kubeconfig --region ${region} --name ${clusterName}
                     kubectl apply -f mysql-secrets.yaml
                     kubectl apply -f mysql-configMap.yaml
                     kubectl apply -f db-deployment.yaml
-                    kubectl apply -f app-deployment.yaml
                     """
 
+                    sh """
+                    export clusterName=${clusterName}
+                    envsubst < db-deployment.yaml > rendered-db-deployment.yaml
+                    kubectl apply -f rendered-db-deployment.yaml
+                    """
+
+                    // Substitute the cluster name in app-deployment.yaml using envsubst
+                    sh """
+                    export clusterName=${clusterName}
+                    envsubst < app-deployment.yaml > rendered-app-deployment.yaml
+                    kubectl apply -f rendered-app-deployment.yaml
+                    """
                 }
             }
         }
+
+        stage('Install Prometheus Stack') {
+            steps {
+                script {
+                    sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                    sh 'helm repo update'
+                    sh 'helm install mon prometheus-community/kube-prometheus-stack'
+                }
+            }
+        }
+
     }
 
     post {

@@ -47,6 +47,8 @@ spec:
         app: mysql
         tier: database
     spec:
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "${var.cluster_name}-db-ng"
       containers:
         - image: mysql:latest
           name: mysql
@@ -71,6 +73,7 @@ spec:
         - name: mysql-persistent-storage
           persistentVolumeClaim:
             claimName: mysql-pv-claim
+
 ---
 apiVersion: v1
 kind: Service
@@ -86,4 +89,4 @@ spec:
   selector:
     app: mysql
     tier: database
-  clusterIP: None
+  clusterIP: None  # Headless service for internal DNS
