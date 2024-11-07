@@ -16,54 +16,37 @@ pipeline {
                 cleanWs()
             }
         }
-        stage('Checkout Git') {
-            steps {
-                script {
-                    echo 'Checking out code from Git...'
-                    git branch: 'feature/MariemMoula', url: 'https://github.com/YassineSlaoui/IGL5-G5-tpFoyer.git'
-                }
-            }
-        }
+
         stage('Maven Clean') {
             steps {
-                script {
-                    echo 'Cleaning Maven project...'
-                    sh 'mvn clean'
-                }
+                echo 'Cleaning Maven project...'
+                sh 'mvn clean'
             }
         }
         stage('Artifact Construction') {
             steps {
-                script {
                     echo 'Constructing artifacts...'
                     sh 'mvn package -Dmaven.test.skip=true -P test-coverage'
-                }
             }
         }
         stage('Unit Tests') {
             steps {
-                script {
                     echo 'Launching Unit Tests...'
                     sh 'mvn test'
-                }
             }
         }
         stage('SonarQube Analysis') {
             steps {
-                script {
                     echo 'Running SonarQube analysis...'
                     withCredentials([usernamePassword(credentialsId: 'sonarqube_credentials', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASSWORD')]) {
                         sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER -Dsonar.password=$SONAR_PASSWORD'
-                    }
                 }
             }
         }
         stage('Publish to Nexus') {
             steps {
-                script {
                     echo 'Publishing artifacts to Nexus...'
-                        sh 'mvn deploy'
-                }
+                    sh 'mvn deploy'
             }
         }
         stage('Build Docker Image') {
