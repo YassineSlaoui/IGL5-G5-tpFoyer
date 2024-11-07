@@ -11,12 +11,6 @@ pipeline {
     }
 
     stages {
-        stage('Cleanup') {
-            steps {
-                cleanWs()
-            }
-        }
-
         stage('Maven Clean') {
             steps {
                 echo 'Cleaning Maven project...'
