@@ -83,9 +83,9 @@ pipeline {
                         env.AWS_SECRET_ACCESS_KEY = awsCredentials.find { it.startsWith("aws_secret_access_key") }.split("=")[1].trim()
                         env.AWS_SESSION_TOKEN = awsCredentials.find { it.startsWith("aws_session_token") }?.split("=")[1]?.trim()
 
-                        sh 'aws configure set aws_access_key_id ${env.AWS_ACCESS_KEY_ID}'
-                        sh 'aws configure set aws_secret_access_key ${env.AWS_SECRET_ACCESS_KEY}'
-                        sh 'aws configure set aws_session_token ${env.AWS_SESSION_TOKEN}'
+                        sh 'aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}'
+                        sh 'aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}'
+                        sh 'aws configure set aws_session_token ${AWS_SESSION_TOKEN}'
 
                         echo "AWS Access Key ID: ${env.AWS_ACCESS_KEY_ID}"
 
