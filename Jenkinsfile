@@ -143,7 +143,6 @@ pipeline {
 
         stage('Terraform Setup') {
             steps {
-                script {
                     // Initialize Terraform
                     sh 'terraform -chdir=Terraform init'
 
@@ -158,7 +157,6 @@ pipeline {
                             -var role_arn=${env.ROLE_ARN} \
                             -var 'subnet_ids=[\"${env.SUBNET_ID_A}\",\"${env.SUBNET_ID_B}\"]'
                     """
-                }
             }
         }
         stage('Deploy to EKS') {
