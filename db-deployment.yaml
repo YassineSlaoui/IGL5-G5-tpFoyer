@@ -47,8 +47,8 @@ spec:
         app: mysql
         tier: database
     spec:
-      nodeSelector:
-        eks.amazonaws.com/nodegroup: "${var.cluster_name}-db-ng"
+#      nodeSelector:
+#        eks.amazonaws.com/nodegroup: "${var.cluster_name}-db-ng"
       containers:
         - image: mysql:latest
           name: mysql

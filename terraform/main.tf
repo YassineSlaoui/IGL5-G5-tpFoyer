@@ -74,32 +74,15 @@ resource "aws_eks_cluster" "my_cluster" {
   }
 }
 
-# Existing public node group (for the application)
-resource "aws_eks_node_group" "app_node_group" {
+resource "aws_eks_node_group" "cluster_node_group" {
   cluster_name    = aws_eks_cluster.my_cluster.name
-  node_group_name = "${var.cluster_name}-app-ng"
+  node_group_name = "${var.cluster_name}-ng"
   node_role_arn   = data.aws_iam_role.lab_role.arn
-  subnet_ids      = [aws_subnet.public_subnet.id]  # Public subnet
+  subnet_ids      = [aws_subnet.public_subnet.id, aws_subnet.private_subnet.id]  # Both subnets
 
   scaling_config {
     desired_size = 2
     max_size     = 4
-    min_size     = 1
-  }
-
-  depends_on = [aws_eks_cluster.my_cluster]
-}
-
-# New private node group (for the database)
-resource "aws_eks_node_group" "db_node_group" {
-  cluster_name    = aws_eks_cluster.my_cluster.name
-  node_group_name = "${var.cluster_name}-db-ng"
-  node_role_arn   = data.aws_iam_role.lab_role.arn
-  subnet_ids      = [aws_subnet.private_subnet.id]  # Private subnet
-
-  scaling_config {
-    desired_size = 1
-    max_size     = 2
     min_size     = 1
   }
 
