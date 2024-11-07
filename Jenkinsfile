@@ -144,7 +144,7 @@ pipeline {
         stage('Apply Terraform') {
             steps {
                 dir('Terraform') {
-                    sh 'terraform apply -auto-approve'
+                    sh 'terraform apply -auto-approve -var cluster_name=${CLUSTER_NAME}'
                 }
             }
         }
