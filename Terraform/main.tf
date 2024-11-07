@@ -82,12 +82,30 @@ resource "aws_security_group" "eks_security_group" {
   }
 }
 
-# Create EKS node group
-resource "aws_eks_node_group" "my_node_group" {
+# Create EKS node group for database in the private subnet
+resource "aws_eks_node_group" "db_node_group" {
   cluster_name    = aws_eks_cluster.my_cluster.name
-  node_group_name = "NodeGroup"
+  node_group_name = "DbNodeGroup"
   node_role_arn   = data.aws_iam_role.lab_role.arn
-  subnet_ids      = [aws_subnet.public_subnet.id]
+  subnet_ids      = [aws_subnet.private_subnet.id]  # Private subnet for DB nodes
+
+  scaling_config {
+    desired_size = 2
+    max_size     = 3
+    min_size     = 1
+  }
+
+  depends_on = [
+    aws_eks_cluster.my_cluster
+  ]
+}
+
+# Create EKS node group for Spring app in the public subnet
+resource "aws_eks_node_group" "spring_app_node_group" {
+  cluster_name    = aws_eks_cluster.my_cluster.name
+  node_group_name = "SpringAppNodeGroup"
+  node_role_arn   = data.aws_iam_role.lab_role.arn
+  subnet_ids      = [aws_subnet.public_subnet.id]  # Public subnet for Spring app nodes
 
   scaling_config {
     desired_size = 2
