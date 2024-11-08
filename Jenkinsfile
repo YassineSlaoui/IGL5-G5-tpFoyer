@@ -121,6 +121,12 @@ pipeline {
                     sh 'terraform -chdir=terraform validate'
 
                     sh '''
+                    terraform -chdir=terraform plan \
+                        -var aws_region=${region} \
+                        -var cluster_name=${clusterName}
+                    '''
+
+                    sh '''
                     terraform -chdir=terraform apply -auto-approve \
                         -var aws_region=${region} \
                         -var cluster_name=${clusterName}
@@ -132,39 +138,42 @@ pipeline {
         stage('Deploy to AWS Kubernetes (EKS)') {
             steps {
                 script {
-                    // Update kubeconfig to interact with the EKS cluster
-                    sh """
-                    aws eks update-kubeconfig --region ${region} --name ${clusterName}
-                    kubectl apply -f mysql-secrets.yaml
-                    kubectl apply -f mysql-configMap.yaml
-                    """
+                    dir('kubernetes') {
+                        // Update kubeconfig to interact with the EKS cluster
+                        sh """
+                        aws eks update-kubeconfig --region ${region} --name ${clusterName}
+                        kubectl apply -f mysql-secrets.yaml
+                        kubectl apply -f mysql-configMap.yaml
+                        """
 
-                    sh """
-                    export cluster_name=${clusterName}
-                    envsubst < db-deployment.yaml > rendered-db-deployment.yaml
-                    kubectl apply -f rendered-db-deployment.yaml
-                    """
+                        sh """
+                        export cluster_name=${clusterName}
+                        envsubst < db-deployment.yaml > rendered-db-deployment.yaml
+                        kubectl apply -f rendered-db-deployment.yaml
+                        """
 
-                    // Substitute the cluster name in app-deployment.yaml using envsubst
-                    sh """
-                    export cluster_name=${clusterName}
-                    envsubst < app-deployment.yaml > rendered-app-deployment.yaml
-                    kubectl apply -f rendered-app-deployment.yaml
-                    """
+                        // Substitute the cluster name in app-deployment.yaml using envsubst
+                        sh """
+                        export cluster_name=${clusterName}
+                        envsubst < app-deployment.yaml > rendered-app-deployment.yaml
+                        kubectl apply -f rendered-app-deployment.yaml
+                        """
+                    }
                 }
             }
         }
 
-        stage('Install Prometheus Stack') {
+        stage('Install Node Exporter') {
             steps {
                 script {
-                    def releaseExists = sh(script: "helm list -q | grep -w prometheus-stack", returnStatus: true) == 0
-                    if (!releaseExists) {
+                    def nodeExporterInstalled = sh(script: "helm list -q -n monitoring | grep -w prometheus-node-exporter", returnStatus: true) == 0
+                    if (!nodeExporterInstalled) {
                         sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
                         sh 'helm repo update'
-                        sh 'helm install prometheus-stack prometheus-community/kube-prometheus-stack'
+                        sh 'helm install prometheus-node-exporter prometheus-community/prometheus-node-exporter -n monitoring --create-namespace'
+                        sh 'kubectl port-forward svc/prometheus-node-exporter 9100:9100 -n monitoring &'
                     } else {
-                        echo 'Prometheus stack is already installed. Skipping installation.'
+                        echo 'Node Exporter is already installed in the monitoring namespace. Skipping installation.'
                     }
                 }
             }
