@@ -28,5 +28,5 @@ public class Reservation implements Serializable {
 
     @ToString.Exclude
     @ManyToMany
-    Set<Etudiant> etudiants;
+    private Set<Etudiant> etudiants;
 }

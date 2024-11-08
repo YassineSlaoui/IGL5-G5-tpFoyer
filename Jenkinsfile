@@ -189,20 +189,21 @@ pipeline {
                 }
             }
         }
+    }
 
-        post {
-            success {
-                echo 'Pipeline completed successfully.'
-                mail to: 'yassine.slaoui@etudiant-fst.utm.tn',
-                        subject: "Pipeline Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                        body: "The pipeline completed successfully. The ELB link is: ${env.ELB_LINK}"
-            }
-            failure {
-                echo 'Pipeline failed.'
-                mail to: 'yassine.slaoui@etudiant-fst.utm.tn',
-                        subject: "Pipeline Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                        body: "The pipeline failed. Please check the Jenkins logs for more details."
-            }
+    post {
+        success {
+            echo 'Pipeline completed successfully.'
+            mail to: 'yassine.slaoui@etudiant-fst.utm.tn',
+                    subject: "Pipeline Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: "The pipeline completed successfully. The ELB link is: ${env.ELB_LINK}"
+        }
+
+        failure {
+            echo 'Pipeline failed.'
+            mail to: 'yassine.slaoui@etudiant-fst.utm.tn',
+                    subject: "Pipeline Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: "The pipeline failed. Please check the Jenkins logs for more details."
         }
     }
 }
