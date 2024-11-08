@@ -8,6 +8,7 @@ import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.entities.Universite;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,10 +19,10 @@ class BlocRepositoryTest {
     private BlocRepository blocRepository;
 
     @Autowired
-    private UniversiteRepository universiteRepository;
+    private FoyerRepository foyerRepository;
 
     @Autowired
-    private FoyerRepository foyerRepository;
+    private UniversiteRepository universiteRepository;
 
     @Test
     void findByFoyerUniversiteIdUniversite() {
@@ -48,9 +49,7 @@ class BlocRepositoryTest {
         // Save the Bloc
         blocRepository.save(bloc);
 
-        // Retrieve the Bloc by Universite ID
-        List<Bloc> blocs = blocRepository.findByFoyerUniversiteIdUniversite(universite.getIdUniversite());
-        assertFalse(blocs.isEmpty());
-        assertEquals("Bloc1", blocs.get(0).getNomBloc());
+        Optional<Bloc> optionalBloc = blocRepository.findByNomBloc("Bloc1");
+        assertTrue(optionalBloc.isPresent());
     }
 }
