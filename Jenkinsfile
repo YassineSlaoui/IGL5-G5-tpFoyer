@@ -111,7 +111,7 @@ pipeline {
 //                        env.VPC_ID = sh(script: "aws ec2 describe-vpcs --region ${region} --query 'Vpcs[1].VpcId' --output text", returnStdout: true).trim()
 //                        echo "Retrieved VPC ID: ${env.VPC_ID}"
 //
-                        //
+
 //                        // Retrieve Internet Gateway ID
 //                        env.IGW_ID = sh(script: "aws ec2 describe-internet-gateways --region ${region} --query 'InternetGateways[0].InternetGatewayId' --output text", returnStdout: true).trim()
 //                        echo "Retrieved Internet Gateway ID: ${env.IGW_ID}"
