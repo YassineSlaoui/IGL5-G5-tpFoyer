@@ -21,16 +21,16 @@ public class Foyer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
-    long idFoyer;
+    private long idFoyer;
 
-    String nomFoyer;
+    private String nomFoyer;
 
-    long capaciteFoyer;
+    private long capaciteFoyer;
 
     @ToString.Exclude
     @OneToOne(mappedBy = "foyer")
     @JsonIgnore
-    Universite universite;
+    private Universite universite;
 
     @JsonIgnore
     @ToString.Exclude

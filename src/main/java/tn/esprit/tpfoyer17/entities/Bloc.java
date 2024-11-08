@@ -28,9 +28,9 @@ public class Bloc implements Serializable {
 
     @ToString.Exclude
     @ManyToOne
-    Foyer foyer;
+    private Foyer foyer;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "bloc")
-    Set<Chambre> chambres;
+    private Set<Chambre> chambres;
 }

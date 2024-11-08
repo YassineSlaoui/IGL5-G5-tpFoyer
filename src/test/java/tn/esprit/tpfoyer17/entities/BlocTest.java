@@ -48,8 +48,8 @@ class BlocTest {
     @Test
     void setNomBloc() {
         Bloc bloc = new Bloc();
-        bloc.setNomBloc("A1");
-        assertEquals("A1", bloc.getNomBloc());
+        bloc.setNomBloc("A2");
+        assertEquals("A2", bloc.getNomBloc());
     }
 
     @Test
