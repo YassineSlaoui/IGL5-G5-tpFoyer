@@ -12,8 +12,8 @@ spec:
       labels:
         app: tpfoyer-springboot
     spec:
-#      nodeSelector:
-#        eks.amazonaws.com/nodegroup: "${var.cluster_name}-app-ng"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "${var.cluster_name}-app-ng"
       containers:
         - name: tpfoyer-springboot-k8s
           image: dfcn0/tpfoyer-springboot:latest

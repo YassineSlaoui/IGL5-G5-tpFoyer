@@ -14,22 +14,12 @@ resource "aws_vpc" "eks_vpc" {
 
 # Create a public subnet
 resource "aws_subnet" "public_subnet" {
-  vpc_id            = aws_vpc.eks_vpc.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "${var.aws_region}a"
+  vpc_id                  = aws_vpc.eks_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
   tags = {
     Name = "${var.cluster_name}-public-subnet"
-  }
-}
-
-# Create a private subnet
-resource "aws_subnet" "private_subnet" {
-  vpc_id            = aws_vpc.eks_vpc.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "${var.aws_region}b"
-  tags = {
-    Name = "${var.cluster_name}-private-subnet"
   }
 }
 
@@ -58,6 +48,41 @@ resource "aws_route_table_association" "public_rt_assoc" {
   route_table_id = aws_route_table.public_rt.id
 }
 
+# Create a private subnet
+resource "aws_subnet" "private_subnet" {
+  vpc_id            = aws_vpc.eks_vpc.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "${var.aws_region}b"
+  tags = {
+    Name = "${var.cluster_name}-private-subnet"
+  }
+}
+
+# Create Elastic IP for NAT Gateway
+resource "aws_eip" "nat_gw_ip" {}
+
+# Create NAT Gateway in a public subnet
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.nat_gw_ip.id
+  subnet_id     = aws_subnet.public_subnet.id
+}
+
+# Route table for the private subnet to use NAT Gateway
+resource "aws_route_table" "private_route_table" {
+  vpc_id = aws_vpc.eks_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.nat_gateway.id
+  }
+}
+
+# Associate the private route table with the private subnet
+resource "aws_route_table_association" "private_assoc" {
+  subnet_id      = aws_subnet.private_subnet.id
+  route_table_id = aws_route_table.private_route_table.id
+}
+
 # Reference the LabRole ARN directly
 data "aws_iam_role" "lab_role" {
   name = "LabRole"
@@ -74,15 +99,32 @@ resource "aws_eks_cluster" "my_cluster" {
   }
 }
 
-resource "aws_eks_node_group" "cluster_node_group" {
+# Existing public node group (for the application)
+resource "aws_eks_node_group" "app_node_group" {
   cluster_name    = aws_eks_cluster.my_cluster.name
-  node_group_name = "${var.cluster_name}-ng"
+  node_group_name = "${var.cluster_name}-app-ng"
   node_role_arn   = data.aws_iam_role.lab_role.arn
-  subnet_ids      = [aws_subnet.public_subnet.id]  # Both subnets
+  subnet_ids = [aws_subnet.public_subnet.id]  # Public subnet
 
   scaling_config {
     desired_size = 2
     max_size     = 4
+    min_size     = 1
+  }
+
+  depends_on = [aws_eks_cluster.my_cluster]
+}
+
+# New private node group (for the database)
+resource "aws_eks_node_group" "db_node_group" {
+  cluster_name    = aws_eks_cluster.my_cluster.name
+  node_group_name = "${var.cluster_name}-db-ng"
+  node_role_arn   = data.aws_iam_role.lab_role.arn
+  subnet_ids = [aws_subnet.private_subnet.id]  # Private subnet
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 2
     min_size     = 1
   }
 
