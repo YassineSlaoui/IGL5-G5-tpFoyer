@@ -58,29 +58,35 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-# Create Elastic IP for NAT Gateway
-resource "aws_eip" "nat_gw_ip" {}
-
-# Create NAT Gateway in a public subnet
-resource "aws_nat_gateway" "nat_gateway" {
-  allocation_id = aws_eip.nat_gw_ip.id
-  subnet_id     = aws_subnet.public_subnet.id
+# Create a NAT Gateway in the public subnet
+resource "aws_eip" "nat" {
+  depends_on = [aws_internet_gateway.eks_igw]
 }
 
-# Route table for the private subnet to use NAT Gateway
-resource "aws_route_table" "private_route_table" {
-  vpc_id = aws_vpc.eks_vpc.id
+resource "aws_nat_gateway" "nat_gw" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public_subnet.id
+  tags = {
+    Name = "${var.cluster_name}-nat-gateway"
+  }
+}
 
+# Create a private route table for the private subnet
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.eks_vpc.id
   route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateway.id
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gw.id
+  }
+  tags = {
+    Name = "${var.cluster_name}-private-rt"
   }
 }
 
 # Associate the private route table with the private subnet
-resource "aws_route_table_association" "private_assoc" {
+resource "aws_route_table_association" "private_rt_assoc" {
   subnet_id      = aws_subnet.private_subnet.id
-  route_table_id = aws_route_table.private_route_table.id
+  route_table_id = aws_route_table.private_rt.id
 }
 
 # Reference the LabRole ARN directly
