@@ -148,21 +148,31 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to EKS') {
+        stage('Deploy to AWS Kubernetes (EKS)') {
             steps {
-                // Set up kubectl with EKS cluster
-                sh 'aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}'
+                script {
+                    // Update kubeconfig to interact with the EKS cluster
+                    sh """
+                    aws eks update-kubeconfig --region ${region} --name ${CLUSTER_NAME}
+                    kubectl apply -f mysql-secrets.yaml
+                    kubectl apply -f mysql-configMap.yaml
+                    """
 
-                // Apply the ConfigMap and Secret first to make sure environment variables are available
-                sh 'kubectl apply -f mysql-configMap.yaml'
-                sh 'kubectl apply -f mysql-secrets.yaml'
+                    sh """
+                    export cluster_name=${CLUSTER_NAME}
+                    envsubst < deployment-mysql.yaml > rendered-deployment-mysql.yaml
+                    kubectl apply -f rendered-deployment-mysql.yaml
+                    """
 
-                // Apply remaining Kubernetes configurations for the application and database deployments
-                sh 'kubectl apply -f deployment-mysql.yaml'
-                sh 'kubectl apply -f deployment.yaml'
+                    // Substitute the cluster name in app-deployment.yaml using envsubst
+                    sh """
+                    export cluster_name=${CLUSTER_NAME}
+                    envsubst < deployment.yaml > rendered-deployment.yaml
+                    kubectl apply -f rendered-deployment.yaml
+                    """
+                }
             }
         }
-
     }
 
     post {

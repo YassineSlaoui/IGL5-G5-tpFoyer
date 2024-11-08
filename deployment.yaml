@@ -14,6 +14,8 @@ spec:
       labels:
         app: spring
     spec:
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "${cluster_name}-app-ng"
       containers:
         - name: spring-app
           image: mimi019/docker-spring-boot
