@@ -8,30 +8,30 @@ class UniversiteTest {
 
     @Test
     void getIdUniversite() {
-        Universite universite = new Universite();
-        assertEquals(0, universite.getIdUniversite());
+        Universite uneUniversite = new Universite();
+        assertEquals(0, uneUniversite.getIdUniversite());
     }
 
     @Test
     void getNomUniversite() {
         Universite universite = new Universite();
-        universite.setNomUniversite("University1");
-        assertEquals("University1", universite.getNomUniversite());
+        universite.setNomUniversite("University01");
+        assertEquals("University01", universite.getNomUniversite());
     }
 
     @Test
     void getAdresse() {
         Universite universite = new Universite();
-        universite.setAdresse("123 Main St");
-        assertEquals("123 Main St", universite.getAdresse());
+        universite.setAdresse("1234 Main St");
+        assertEquals("1234 Main St", universite.getAdresse());
     }
 
     @Test
     void getFoyer() {
         Universite universite = new Universite();
-        Foyer foyer = new Foyer();
-        universite.setFoyer(foyer);
-        assertEquals(foyer, universite.getFoyer());
+        Foyer unFoyer = new Foyer();
+        universite.setFoyer(unFoyer);
+        assertEquals(unFoyer, universite.getFoyer());
     }
 
     @Test

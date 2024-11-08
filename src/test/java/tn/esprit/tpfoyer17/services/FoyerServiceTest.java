@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 class FoyerServiceTest {
 
     @Mock
@@ -32,11 +34,8 @@ class FoyerServiceTest {
 
     @BeforeEach
     void setUp() {
-        try (AutoCloseable ignored = MockitoAnnotations.openMocks(this)) {
-            // Initialization code if needed
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        AutoCloseable autoCloseable = MockitoAnnotations.openMocks(this);
+        log.info("AutoCloseable: {}", autoCloseable);
     }
 
     @Test

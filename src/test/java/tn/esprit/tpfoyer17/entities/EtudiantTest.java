@@ -18,39 +18,39 @@ class EtudiantTest {
 
     @Test
     void getNomEtudiant() {
-        Etudiant etudiant = new Etudiant();
-        etudiant.setNomEtudiant("John");
-        assertEquals("John", etudiant.getNomEtudiant());
+        Etudiant unEtudiant = new Etudiant();
+        unEtudiant.setNomEtudiant("John");
+        assertEquals("John", unEtudiant.getNomEtudiant());
     }
 
     @Test
     void getPrenomEtudiant() {
-        Etudiant etudiant = new Etudiant();
-        etudiant.setPrenomEtudiant("Doe");
-        assertEquals("Doe", etudiant.getPrenomEtudiant());
+        Etudiant unEtudiant = new Etudiant();
+        unEtudiant.setPrenomEtudiant("Doe");
+        assertEquals("Doe", unEtudiant.getPrenomEtudiant());
     }
 
     @Test
     void getCinEtudiant() {
-        Etudiant etudiant = new Etudiant();
-        etudiant.setCinEtudiant(12345678L);
-        assertEquals(12345678L, etudiant.getCinEtudiant());
+        Etudiant unEtudiant = new Etudiant();
+        unEtudiant.setCinEtudiant(12345678L);
+        assertEquals(12345678L, unEtudiant.getCinEtudiant());
     }
 
     @Test
     void getDateNaissance() {
-        Etudiant etudiant = new Etudiant();
+        Etudiant unEtudiant = new Etudiant();
         Date date = new Date();
-        etudiant.setDateNaissance(date);
-        assertEquals(date, etudiant.getDateNaissance());
+        unEtudiant.setDateNaissance(date);
+        assertEquals(date, unEtudiant.getDateNaissance());
     }
 
     @Test
     void getReservations() {
-        Etudiant etudiant = new Etudiant();
+        Etudiant unEtudiant = new Etudiant();
         Set<Reservation> reservations = new HashSet<>();
-        etudiant.setReservations(reservations);
-        assertEquals(reservations, etudiant.getReservations());
+        unEtudiant.setReservations(reservations);
+        assertEquals(reservations, unEtudiant.getReservations());
     }
 
     @Test

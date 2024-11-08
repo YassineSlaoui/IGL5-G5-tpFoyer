@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -9,7 +10,6 @@ import tn.esprit.tpfoyer17.entities.Bloc;
 import tn.esprit.tpfoyer17.entities.Chambre;
 import tn.esprit.tpfoyer17.repositories.BlocRepository;
 import tn.esprit.tpfoyer17.repositories.ChambreRepository;
-import tn.esprit.tpfoyer17.services.BlocService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +18,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 class BlocServiceTest {
 
     @Mock
@@ -31,7 +32,8 @@ class BlocServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        AutoCloseable autoCloseable = MockitoAnnotations.openMocks(this);
+        log.info("AutoCloseable: {}", autoCloseable);
     }
 
     @Test
