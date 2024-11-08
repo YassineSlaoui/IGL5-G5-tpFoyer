@@ -197,27 +197,34 @@ pipeline {
             }
         }
 
-        stage('Create Prometheus Namespace') {
-            steps {
-                echo 'Creating monitoring namespace for Prometheus...'
-                sh 'kubectl create namespace ${NAMESPACE} || true'
-            }
-        }
-
         stage('Install Node Exporter with Helm') {
             steps {
-                echo 'Installing Node Exporter on Kubernetes...'
-                sh 'helm install node-exporter prometheus-community/prometheus-node-exporter -n ${NAMESPACE}'
+                script {
+                    def nodeExporterInstalled = sh(script: "helm list -n ${NAMESPACE} | grep node-exporter", returnStatus: true) == 0
+                    if (!nodeExporterInstalled) {
+                        echo 'Installing Node Exporter on Kubernetes...'
+                        sh 'helm install node-exporter prometheus-community/prometheus-node-exporter -n ${NAMESPACE} --create-namespace'
+                    } else {
+                        echo 'Node Exporter is already installed.'
+                    }
+                }
             }
         }
 
         stage('Install Prometheus using Config File') {
             steps {
-                echo 'Setting up Prometheus with prometheus.yml...'
-                sh """
+                script {
+                    def prometheusInstalled = sh(script: "helm list -n ${NAMESPACE} | grep prometheus", returnStatus: true) == 0
+                    if (!prometheusInstalled) {
+                        echo 'Setting up Prometheus with prometheus.yml...'
+                        sh """
                 kubectl create configmap prometheus-config --from-file=${PROMETHEUS_CONFIG_PATH} -n ${NAMESPACE}
                 helm install prometheus prometheus-community/prometheus -f ${PROMETHEUS_CONFIG_PATH} -n ${NAMESPACE}
                 """
+                    } else {
+                        echo 'Prometheus is already installed.'
+                    }
+                }
             }
         }
 
@@ -227,15 +234,6 @@ pipeline {
                 sh 'kubectl port-forward svc/prometheus-server 9090:9090 -n ${NAMESPACE} &'
             }
         }
-
-
-
-
-
-
-
-
-
 
 
     }
