@@ -185,7 +185,7 @@ pipeline {
                     sh 'helm repo update'
 
                     // Install Prometheus Operator
-                    sh "helm install ${PROMETHEUS_OPERATOR_RELEASE_NAME} prometheus-community/kube-prometheus-stack -n ${NAMESPACE}"
+                    sh "helm install ${PROMETHEUS_OPERATOR_RELEASE_NAME} prometheus-community/kube-prometheus-stack -n ${NAMESPACE} --create-namespace"
                 }
             }
         }
