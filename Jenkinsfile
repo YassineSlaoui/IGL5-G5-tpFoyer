@@ -54,6 +54,20 @@ pipeline {
             }
         }
 
+        stage('Dockerfile Setup') {
+            steps {
+                script {
+                    echo 'Setting up Dockerfile...'
+                    sh '''
+                    jarFile=$(ls target/*.jar)
+                    echo "Found JAR file: $jarFile"
+                    export APP_JAR=$jarFile
+                    envsubst < Dockerfiletemplate > Dockerfile
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {

@@ -19,31 +19,31 @@ class ChambreTest {
     @Test
     void getNumeroChambre() {
         Chambre chambre = new Chambre();
-        chambre.setNumeroChambre(101);
-        assertEquals(101, chambre.getNumeroChambre());
+        chambre.setNumeroChambre(102);
+        assertEquals(102, chambre.getNumeroChambre());
     }
 
     @Test
     void getTypeChambre() {
         Chambre chambre = new Chambre();
-        chambre.setTypeChambre(TypeChambre.SINGLE);
-        assertEquals(TypeChambre.SINGLE, chambre.getTypeChambre());
+        chambre.setTypeChambre(TypeChambre.DOUBLE);
+        assertEquals(TypeChambre.DOUBLE, chambre.getTypeChambre());
     }
 
     @Test
     void getBloc() {
         Chambre chambre = new Chambre();
-        Bloc bloc = new Bloc();
-        chambre.setBloc(bloc);
-        assertEquals(bloc, chambre.getBloc());
+        Bloc unBloc = new Bloc();
+        chambre.setBloc(unBloc);
+        assertEquals(unBloc, chambre.getBloc());
     }
 
     @Test
     void getReservations() {
         Chambre chambre = new Chambre();
-        Set<Reservation> reservations = new HashSet<>();
-        chambre.setReservations(reservations);
-        assertEquals(reservations, chambre.getReservations());
+        Set<Reservation> reservationHashSet = new HashSet<>();
+        chambre.setReservations(reservationHashSet);
+        assertEquals(reservationHashSet, chambre.getReservations());
     }
 
     @Test

@@ -55,24 +55,24 @@ class BlocTest {
     @Test
     void setCapaciteBloc() {
         Bloc bloc = new Bloc();
-        bloc.setCapaciteBloc(100);
-        assertEquals(100, bloc.getCapaciteBloc());
+        bloc.setCapaciteBloc(200);
+        assertEquals(200, bloc.getCapaciteBloc());
     }
 
     @Test
     void setFoyer() {
         Bloc bloc = new Bloc();
-        Foyer foyer = new Foyer();
-        bloc.setFoyer(foyer);
-        assertEquals(foyer, bloc.getFoyer());
+        Foyer unFoyer = new Foyer();
+        bloc.setFoyer(unFoyer);
+        assertEquals(unFoyer, bloc.getFoyer());
     }
 
     @Test
     void setChambres() {
         Bloc bloc = new Bloc();
-        Set<Chambre> chambres = new HashSet<>();
-        bloc.setChambres(chambres);
-        assertEquals(chambres, bloc.getChambres());
+        Set<Chambre> chambreHashSet = new HashSet<>();
+        bloc.setChambres(chambreHashSet);
+        assertEquals(chambreHashSet, bloc.getChambres());
     }
 
     @Test
