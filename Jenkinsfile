@@ -171,10 +171,19 @@ pipeline {
                         sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
                         sh 'helm repo update'
                         sh 'helm install prometheus-node-exporter prometheus-community/prometheus-node-exporter -n monitoring --create-namespace'
-                        sh 'kubectl port-forward svc/prometheus-node-exporter 9100:9100 -n monitoring &'
+                        sh 'nohup kubectl port-forward svc/prometheus-node-exporter 9110:9100 -n monitoring &'
                     } else {
                         echo 'Node Exporter is already installed in the monitoring namespace. Skipping installation.'
                     }
+                }
+            }
+        }
+
+        stage('Start Proxy Server for Prometheus container') {
+            steps {
+                script {
+                    echo 'Starting proxy server...'
+                    sh 'nohup python3 proxyServer.py &'
                 }
             }
         }
