@@ -137,18 +137,17 @@ pipeline {
                     aws eks update-kubeconfig --region ${region} --name ${clusterName}
                     kubectl apply -f mysql-secrets.yaml
                     kubectl apply -f mysql-configMap.yaml
-                    kubectl apply -f db-deployment.yaml
                     """
 
                     sh """
-                    export clusterName=${clusterName}
+                    export cluster_name=${clusterName}
                     envsubst < db-deployment.yaml > rendered-db-deployment.yaml
                     kubectl apply -f rendered-db-deployment.yaml
                     """
 
                     // Substitute the cluster name in app-deployment.yaml using envsubst
                     sh """
-                    export clusterName=${clusterName}
+                    export cluster_name=${clusterName}
                     envsubst < app-deployment.yaml > rendered-app-deployment.yaml
                     kubectl apply -f rendered-app-deployment.yaml
                     """
