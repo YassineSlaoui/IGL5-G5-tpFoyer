@@ -10,6 +10,8 @@ pipeline {
         region = 'us-east-1'
         PROMETHEUS_OPERATOR_RELEASE_NAME = 'prometheus-operator'
         NAMESPACE = 'monitoring'
+        PROMETHEUS_CONFIG_MAP_NAME = 'prometheus-k8s'
+
     }
 
     stages {
@@ -193,8 +195,11 @@ pipeline {
         stage('Configure Prometheus to Scrape EKS Node Metrics') {
             steps {
                 script {
+                    // Get the actual name of the Prometheus ConfigMap
+                    env.PROMETHEUS_CONFIG_MAP_NAME = sh(script: "kubectl -n ${NAMESPACE} get configmap | grep prometheus-k8s | awk '{print \$1}'", returnStdout: true).trim()
+
                     // Edit the Prometheus ConfigMap to update the scrape configuration
-                    sh "kubectl -n ${NAMESPACE} edit configmap/prometheus-k8s"
+                    sh "kubectl -n ${NAMESPACE} edit configmap/${env.PROMETHEUS_CONFIG_MAP_NAME}"
                 }
             }
         }
