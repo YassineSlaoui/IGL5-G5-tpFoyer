@@ -12,6 +12,8 @@ pipeline {
         NODE_EXPORTER_RELEASE_NAME = 'node-exporter'
         NAMESPACE = 'monitoring'
         PROMETHEUS_CONFIG_MAP_NAME = 'prometheus-k8s'
+        METRICS_SERVER_RELEASE_NAME = 'metrics-server'
+
 
     }
 
@@ -209,6 +211,21 @@ pipeline {
                         sh "helm install ${NODE_EXPORTER_RELEASE_NAME} prometheus-community/prometheus-node-exporter -n ${NAMESPACE}"
                     } else {
                         echo "Node Exporter is already installed in the ${NAMESPACE} namespace."
+                    }
+                }
+            }
+        }
+
+        stage('Install Metrics Server') {
+            steps {
+                script {
+                    // Check if Metrics Server is already installed
+                    def metricsServerInstalled = sh(script: "helm list -n kube-system | grep ${METRICS_SERVER_RELEASE_NAME}", returnStatus: true)
+                    if (metricsServerInstalled != 0) {
+                        // Install Metrics Server
+                        sh "helm install ${METRICS_SERVER_RELEASE_NAME} stable/metrics-server -n kube-system"
+                    } else {
+                        echo "Metrics Server is already installed in the kube-system namespace."
                     }
                 }
             }
