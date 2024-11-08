@@ -158,9 +158,14 @@ pipeline {
         stage('Install Prometheus Stack') {
             steps {
                 script {
-                    sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
-                    sh 'helm repo update'
-                    sh 'helm install mon prometheus-community/kube-prometheus-stack'
+                    def releaseExists = sh(script: "helm list -q | grep -w prometheus-stack", returnStatus: true) == 0
+                    if (!releaseExists) {
+                        sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                        sh 'helm repo update'
+                        sh 'helm install prometheus-stack prometheus-community/kube-prometheus-stack'
+                    } else {
+                        echo 'Prometheus stack is already installed. Skipping installation.'
+                    }
                 }
             }
         }
