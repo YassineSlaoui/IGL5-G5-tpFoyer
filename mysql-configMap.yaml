@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+  db_host: "mysql"
+  db_name: "tpFoyer17"

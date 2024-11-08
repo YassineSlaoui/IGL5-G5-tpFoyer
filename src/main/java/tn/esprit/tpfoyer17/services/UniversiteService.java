@@ -31,7 +31,7 @@ public class UniversiteService implements IUniversiteService{
 
     @Override
     public Universite getUniversiteById(long idUniversite) {
-        return universiteRepository.findById(idUniversite).get();
+        return universiteRepository.findById(idUniversite).orElse(null);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class UniversiteService implements IUniversiteService{
 
     @Override
     public Universite desaffecterFoyerAUniversite(long idUniversite) {
-        Universite universite = universiteRepository.findById(idUniversite).get();
+        Universite universite = universiteRepository.findById(idUniversite).orElse(null);
         universite.setFoyer(null);
         return universiteRepository.save(universite);
     }

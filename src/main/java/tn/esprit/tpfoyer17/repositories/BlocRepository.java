@@ -5,8 +5,9 @@ import org.springframework.stereotype.Repository;
 import tn.esprit.tpfoyer17.entities.Bloc;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BlocRepository extends CrudRepository<Bloc,Long> {
-    List<Bloc> findByFoyerUniversiteIdUniversite(long idUniversite);
+    Optional<Bloc> findByNomBloc(String nomBloc);
 }
