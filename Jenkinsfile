@@ -10,7 +10,7 @@ pipeline {
         region = 'us-east-1'
         PROMETHEUS_OPERATOR_RELEASE_NAME = 'prometheus-operator'
         NODE_EXPORTER_RELEASE_NAME = 'node-exporter'
-        NAMESPACE = 'MoONITORING'
+        NAMESPACE = 'monitoring'
         PROMETHEUS_CONFIG_MAP_NAME = 'prometheus-config'
         METRICS_SERVER_RELEASE_NAME = 'metrics-server'
         PROMETHEUS_CONFIG_PATH = './prometheus.yml'
