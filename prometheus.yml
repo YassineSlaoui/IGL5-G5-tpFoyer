@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 15s # How often to scrape targets
+  evaluation_interval: 15s # How often to evaluate rules
+
+scrape_configs:
+  - job_name: 'kubernetes-nodes' # A job to monitor Node Exporter on all nodes
+    kubernetes_sd_configs:
+      - role: node
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: ':9100' # Default Node Exporter port
+
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        regex: true
+      - action: replace
+        source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        target_label: __metrics_path__
+        regex: (.+)
+      - action: replace
+        source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        target_label: __address__
+        regex: (.+)

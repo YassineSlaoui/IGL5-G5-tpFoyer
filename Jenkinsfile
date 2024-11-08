@@ -5,15 +5,15 @@ pipeline {
         registry = "mimi019/docker-spring-boot"
         awsCredentialsId = 'aws_credentials'
         dockerImage = ''
-        AWS_REGION = 'us-east-1' // or your desired region
-        CLUSTER_NAME = 'spring-cluster' // your EKS cluster name
+        AWS_REGION = 'us-east-1'
+        CLUSTER_NAME = 'spring-cluster'
         region = 'us-east-1'
         PROMETHEUS_OPERATOR_RELEASE_NAME = 'prometheus-operator'
         NODE_EXPORTER_RELEASE_NAME = 'node-exporter'
         NAMESPACE = 'monitoring'
-        PROMETHEUS_CONFIG_MAP_NAME = 'prometheus-k8s'
+        PROMETHEUS_CONFIG_MAP_NAME = 'prometheus-config'
         METRICS_SERVER_RELEASE_NAME = 'metrics-server'
-
+        PROMETHEUS_CONFIG_PATH = './prometheus.yml'
 
     }
 
@@ -182,90 +182,62 @@ pipeline {
             }
         }
 
-        stage('Install Prometheus Operator') {
+        stage('Install Kubernetes Metrics Server') {
             steps {
-                script {
-                    // Check if Prometheus Operator is already installed
-                    def prometheusOperatorInstalled = sh(script: "helm list -n ${NAMESPACE} | grep ${PROMETHEUS_OPERATOR_RELEASE_NAME}", returnStatus: true)
-                    if (prometheusOperatorInstalled != 0) {
-                        // Add Prometheus Community Helm repository
-                        sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
-                        sh 'helm repo update'
-
-                        // Install Prometheus Operator
-                        sh "helm install ${PROMETHEUS_OPERATOR_RELEASE_NAME} prometheus-community/kube-prometheus-stack -n ${NAMESPACE} --create-namespace"
-                    } else {
-                        echo "Prometheus Operator is already installed in the ${NAMESPACE} namespace."
-                    }
-                }
+                echo 'Installing Kubernetes Metrics Server...'
+                sh 'kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml'
             }
         }
 
-        stage('Install Node Exporter') {
+        stage('Add Prometheus Helm Repository and Update') {
             steps {
-                script {
-                    // Check if Node Exporter is already installed
-                    def nodeExporterInstalled = sh(script: "helm list -n ${NAMESPACE} | grep ${NODE_EXPORTER_RELEASE_NAME}", returnStatus: true)
-                    if (nodeExporterInstalled != 0) {
-                        // Install Node Exporter
-                        sh "helm install ${NODE_EXPORTER_RELEASE_NAME} prometheus-community/prometheus-node-exporter -n ${NAMESPACE}"
-                    } else {
-                        echo "Node Exporter is already installed in the ${NAMESPACE} namespace."
-                    }
-                }
+                echo 'Adding Prometheus repository...'
+                sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                sh 'helm repo update'
             }
         }
 
-        stage('Install Metrics Server') {
+        stage('Create Prometheus Namespace') {
             steps {
-                script {
-                    // Check if Metrics Server is already installed
-                    def metricsServerInstalled = sh(script: "helm list -n kube-system | grep ${METRICS_SERVER_RELEASE_NAME}", returnStatus: true)
-                    if (metricsServerInstalled != 0) {
-                        // Install Metrics Server
-                        sh "helm install ${METRICS_SERVER_RELEASE_NAME} stable/metrics-server -n kube-system"
-                    } else {
-                        echo "Metrics Server is already installed in the kube-system namespace."
-                    }
-                }
+                echo 'Creating monitoring namespace for Prometheus...'
+                sh 'kubectl create namespace ${NAMESPACE} || true'
             }
         }
 
-        stage('Configure Prometheus to Scrape EKS Node Metrics') {
+        stage('Install Node Exporter with Helm') {
             steps {
-                script {
-                    // Get the list of ConfigMaps in the monitoring namespace
-                    def configMapList = sh(script: "kubectl -n ${NAMESPACE} get configmaps | awk '{print \$1}'", returnStdout: true).trim().split("\n")
-
-                    // Find the Prometheus ConfigMap
-                    def prometheusConfigMap = configMapList.find { it.contains("prometheus-") }
-                    if (prometheusConfigMap) {
-                        // Edit the Prometheus ConfigMap to update the scrape configuration
-                        sh "kubectl -n ${NAMESPACE} edit configmap/${prometheusConfigMap}"
-                    } else {
-                        echo "Prometheus ConfigMap not found in the ${NAMESPACE} namespace."
-                    }
-                }
+                echo 'Installing Node Exporter on Kubernetes...'
+                sh 'helm install node-exporter prometheus-community/prometheus-node-exporter -n ${NAMESPACE}'
             }
         }
 
-        stage('Verify Prometheus Scraping') {
+        stage('Install Prometheus using Config File') {
             steps {
-                script {
-                    // Port-forward the Prometheus service to access the web UI
-                    sh "kubectl -n ${NAMESPACE} port-forward service/prometheus-k8s 9090"
-                }
+                echo 'Setting up Prometheus with prometheus.yml...'
+                sh """
+                kubectl create configmap prometheus-config --from-file=${PROMETHEUS_CONFIG_PATH} -n ${NAMESPACE}
+                helm install prometheus prometheus-community/prometheus -f ${PROMETHEUS_CONFIG_PATH} -n ${NAMESPACE}
+                """
             }
         }
 
-        stage('Visualize Metrics in Grafana') {
+        stage('Port Forward Prometheus to Local') {
             steps {
-                script {
-                    // Port-forward the Grafana service to access the web UI
-                    sh "kubectl -n ${NAMESPACE} port-forward service/grafana 3000"
-                }
+                echo 'Port forwarding Prometheus to access metrics locally...'
+                sh 'kubectl port-forward svc/prometheus-server 9090:9090 -n ${NAMESPACE} &'
             }
         }
+
+
+
+
+
+
+
+
+
+
+
     }
 
     post {
