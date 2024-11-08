@@ -17,6 +17,12 @@ class BlocRepositoryTest {
     @Autowired
     private BlocRepository blocRepository;
 
+    @Autowired
+    private UniversiteRepository universiteRepository;
+
+    @Autowired
+    private FoyerRepository foyerRepository;
+
     @Test
     void findByFoyerUniversiteIdUniversite() {
         // Create a Universite
@@ -29,6 +35,10 @@ class BlocRepositoryTest {
         foyer.setNomFoyer("Foyer1");
         foyer.setCapaciteFoyer(200);
         foyer.setUniversite(universite);
+
+        // Save the Universite and Foyer
+        universite = universiteRepository.save(universite);
+        foyer = foyerRepository.save(foyer);
 
         // Create a Bloc
         Bloc bloc = new Bloc();

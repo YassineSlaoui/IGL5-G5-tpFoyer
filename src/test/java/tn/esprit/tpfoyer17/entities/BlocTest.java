@@ -80,7 +80,7 @@ class BlocTest {
         Bloc bloc = new Bloc();
         bloc.setNomBloc("A1");
         bloc.setCapaciteBloc(100);
-        String expected = "Bloc(idBloc=0, nomBloc=A1, capaciteBloc=100, foyer=null, chambres=null)";
+        String expected = "Bloc(idBloc=0, nomBloc=A1, capaciteBloc=100)";
         assertEquals(expected, bloc.toString());
     }
 

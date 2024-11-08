@@ -74,7 +74,7 @@ class ReservationTest {
         Reservation reservation = new Reservation();
         reservation.setAnneeUniversitaire(new Date());
         reservation.setEstValide(true);
-        String expected = "Reservation(idReservation=null, anneeUniversitaire=" + reservation.getAnneeUniversitaire() + ", estValide=true, etudiants=null)";
+        String expected = "Reservation(idReservation=null, anneeUniversitaire=" + reservation.getAnneeUniversitaire() + ", estValide=true)";
         assertEquals(expected, reservation.toString());
     }
 

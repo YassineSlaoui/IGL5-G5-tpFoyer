@@ -80,7 +80,7 @@ class FoyerTest {
         Foyer foyer = new Foyer();
         foyer.setNomFoyer("Foyer1");
         foyer.setCapaciteFoyer(200);
-        String expected = "Foyer(idFoyer=0, nomFoyer=Foyer1, capaciteFoyer=200, universite=null, blocs=null)";
+        String expected = "Foyer(idFoyer=0, nomFoyer=Foyer1, capaciteFoyer=200)";
         assertEquals(expected, foyer.toString());
     }
 

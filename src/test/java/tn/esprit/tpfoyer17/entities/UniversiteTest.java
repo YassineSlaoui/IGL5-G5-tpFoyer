@@ -61,7 +61,7 @@ class UniversiteTest {
         Universite universite = new Universite();
         universite.setNomUniversite("University1");
         universite.setAdresse("123 Main St");
-        String expected = "Universite(idUniversite=0, nomUniversite=University1, adresse=123 Main St, foyer=null)";
+        String expected = "Universite(idUniversite=0, nomUniversite=University1, adresse=123 Main St)";
         assertEquals(expected, universite.toString());
     }
 

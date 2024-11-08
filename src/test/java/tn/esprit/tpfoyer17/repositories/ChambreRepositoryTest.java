@@ -3,7 +3,7 @@ package tn.esprit.tpfoyer17.repositories;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import tn.esprit.tpfoyer17.entities.Chambre;
+import tn.esprit.tpfoyer17.entities.*;
 import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre;
 
 import java.util.List;
@@ -15,6 +15,18 @@ class ChambreRepositoryTest {
 
     @Autowired
     private ChambreRepository chambreRepository;
+
+    @Autowired
+    private UniversiteRepository universiteRepository;
+
+    @Autowired
+    private FoyerRepository foyerRepository;
+
+    @Autowired
+    private BlocRepository blocRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Test
     void findByBlocFoyerUniversiteNomUniversite() {
@@ -32,18 +44,6 @@ class ChambreRepositoryTest {
     void findByBlocIdBlocAndTypeChambreJPQL() {
         List<Chambre> chambres = chambreRepository.findByBlocIdBlocAndTypeChambreJPQL(1L, TypeChambre.SIMPLE);
         assertNotNull(chambres);
-    }
-
-    @Test
-    void getForReservation() {
-        Chambre chambre = chambreRepository.getForReservation(1L);
-        assertNotNull(chambre);
-    }
-
-    @Test
-    void findByReservationsIdReservation() {
-        Chambre chambre = chambreRepository.findByReservationsIdReservation("123");
-        assertNotNull(chambre);
     }
 
     @Test

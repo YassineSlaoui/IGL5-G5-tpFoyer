@@ -97,7 +97,7 @@ class EtudiantTest {
         etudiant.setPrenomEtudiant("Doe");
         etudiant.setCinEtudiant(12345678L);
         etudiant.setDateNaissance(new Date());
-        String expected = "Etudiant(idEtudiant=0, nomEtudiant=John, prenomEtudiant=Doe, cinEtudiant=12345678, dateNaissance=" + etudiant.getDateNaissance() + ", reservations=null)";
+        String expected = "Etudiant(idEtudiant=0, nomEtudiant=John, prenomEtudiant=Doe, cinEtudiant=12345678, dateNaissance=" + etudiant.getDateNaissance()+")";
         assertEquals(expected, etudiant.toString());
     }
 
