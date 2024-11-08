@@ -8,6 +8,8 @@ pipeline {
         AWS_REGION = 'us-east-1' // or your desired region
         CLUSTER_NAME = 'spring-cluster' // your EKS cluster name
         region = 'us-east-1'
+        PROMETHEUS_OPERATOR_RELEASE_NAME = 'prometheus-operator'
+        NAMESPACE = 'monitoring'
     }
 
     stages {
@@ -171,6 +173,46 @@ pipeline {
                     envsubst < deployment.yaml > rendered-deployment.yaml
                     kubectl apply -f rendered-deployment.yaml
                     """
+                }
+            }
+        }
+
+        stage('Install Prometheus Operator') {
+            steps {
+                script {
+                    // Add Prometheus Community Helm repository
+                    sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                    sh 'helm repo update'
+
+                    // Install Prometheus Operator
+                    sh "helm install ${PROMETHEUS_OPERATOR_RELEASE_NAME} prometheus-community/kube-prometheus-stack -n ${NAMESPACE}"
+                }
+            }
+        }
+
+        stage('Configure Prometheus to Scrape EKS Node Metrics') {
+            steps {
+                script {
+                    // Edit the Prometheus ConfigMap to update the scrape configuration
+                    sh "kubectl -n ${NAMESPACE} edit configmap/prometheus-k8s"
+                }
+            }
+        }
+
+        stage('Verify Prometheus Scraping') {
+            steps {
+                script {
+                    // Port-forward the Prometheus service to access the web UI
+                    sh "kubectl -n ${NAMESPACE} port-forward service/prometheus-k8s 9090"
+                }
+            }
+        }
+
+        stage('Visualize Metrics in Grafana') {
+            steps {
+                script {
+                    // Port-forward the Grafana service to access the web UI
+                    sh "kubectl -n ${NAMESPACE} port-forward service/grafana 3000"
                 }
             }
         }
