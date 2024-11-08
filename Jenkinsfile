@@ -193,11 +193,11 @@ pipeline {
             }
         }
 
-        stage('Get ELB Link and Port and Send Email') {
+        stage('Get ELB Address') {
             steps {
                 script {
-                    def elbLink = sh(script: "kubectl get svc -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
-                    def elbPort = sh(script: "kubectl get svc -o jsonpath='{.items[0].spec.ports[0].port}'", returnStdout: true).trim()
+                    def elbLink = sh(script: "kubectl get svc tpfoyer-springboot-svc -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
+                    def elbPort = sh(script: "kubectl get svc tpfoyer-springboot-svc -o jsonpath='{.spec.ports[0].port}'", returnStdout: true).trim()
                     echo "ELB Link: http://${elbLink}:${elbPort}"
                     env.ELB_LINK = "http://${elbLink}:${elbPort}"
                 }
