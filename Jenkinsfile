@@ -178,14 +178,31 @@ pipeline {
                 }
             }
         }
-    }
 
-    post {
-        success {
-            echo 'Pipeline completed successfully.'
+        stage('Get ELB Link and Port and Send Email') {
+            steps {
+                script {
+                    def elbLink = sh(script: "kubectl get svc -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
+                    def elbPort = sh(script: "kubectl get svc -o jsonpath='{.items[0].spec.ports[0].port}'", returnStdout: true).trim()
+                    echo "ELB Link: http://${elbLink}:${elbPort}"
+                    env.ELB_LINK = "http://${elbLink}:${elbPort}"
+                }
+            }
         }
-        failure {
-            echo 'Pipeline failed.'
+
+        post {
+            success {
+                echo 'Pipeline completed successfully.'
+                mail to: 'your-email@example.com',
+                        subject: "Pipeline Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: "The pipeline completed successfully. The ELB link is: ${env.ELB_LINK}"
+            }
+            failure {
+                echo 'Pipeline failed.'
+                mail to: 'your-email@example.com',
+                        subject: "Pipeline Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: "The pipeline failed. Please check the Jenkins logs for more details."
+            }
         }
     }
 }
