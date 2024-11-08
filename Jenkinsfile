@@ -9,6 +9,7 @@ pipeline {
         CLUSTER_NAME = 'spring-cluster' // your EKS cluster name
         region = 'us-east-1'
         PROMETHEUS_OPERATOR_RELEASE_NAME = 'prometheus-operator'
+        NODE_EXPORTER_RELEASE_NAME = 'node-exporter'
         NAMESPACE = 'monitoring'
         PROMETHEUS_CONFIG_MAP_NAME = 'prometheus-k8s'
 
@@ -197,14 +198,36 @@ pipeline {
                 }
             }
         }
+
+        stage('Install Node Exporter') {
+            steps {
+                script {
+                    // Check if Node Exporter is already installed
+                    def nodeExporterInstalled = sh(script: "helm list -n ${NAMESPACE} | grep ${NODE_EXPORTER_RELEASE_NAME}", returnStatus: true)
+                    if (nodeExporterInstalled != 0) {
+                        // Install Node Exporter
+                        sh "helm install ${NODE_EXPORTER_RELEASE_NAME} prometheus-community/prometheus-node-exporter -n ${NAMESPACE}"
+                    } else {
+                        echo "Node Exporter is already installed in the ${NAMESPACE} namespace."
+                    }
+                }
+            }
+        }
+
         stage('Configure Prometheus to Scrape EKS Node Metrics') {
             steps {
                 script {
-                    // Get the actual name of the Prometheus ConfigMap
-                    env.PROMETHEUS_CONFIG_MAP_NAME = sh(script: "kubectl -n ${NAMESPACE} get configmap | grep prometheus-k8s | awk '{print \$1}'", returnStdout: true).trim()
+                    // Get the list of ConfigMaps in the monitoring namespace
+                    def configMapList = sh(script: "kubectl -n ${NAMESPACE} get configmaps | awk '{print \$1}'", returnStdout: true).trim().split("\n")
 
-                    // Edit the Prometheus ConfigMap to update the scrape configuration
-                    sh "kubectl -n ${NAMESPACE} edit configmap/${env.PROMETHEUS_CONFIG_MAP_NAME}"
+                    // Find the Prometheus ConfigMap
+                    def prometheusConfigMap = configMapList.find { it.contains("prometheus-") }
+                    if (prometheusConfigMap) {
+                        // Edit the Prometheus ConfigMap to update the scrape configuration
+                        sh "kubectl -n ${NAMESPACE} edit configmap/${prometheusConfigMap}"
+                    } else {
+                        echo "Prometheus ConfigMap not found in the ${NAMESPACE} namespace."
+                    }
                 }
             }
         }
