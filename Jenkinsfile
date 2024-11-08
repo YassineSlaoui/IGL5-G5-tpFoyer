@@ -182,12 +182,7 @@ pipeline {
             }
         }
 
-        stage('Install Kubernetes Metrics Server') {
-            steps {
-                echo 'Installing Kubernetes Metrics Server...'
-                sh 'kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml'
-            }
-        }
+
 
         stage('Add Prometheus Helm Repository and Update') {
             steps {
@@ -211,27 +206,10 @@ pipeline {
             }
         }
 
-        stage('Install Prometheus using Config File') {
-            steps {
-                script {
-                    def prometheusInstalled = sh(script: "helm list -n ${NAMESPACE} | grep prometheus", returnStatus: true) == 0
-                    if (!prometheusInstalled) {
-                        echo 'Setting up Prometheus with prometheus.yml...'
-                        sh """
-                kubectl create configmap prometheus-config --from-file=${PROMETHEUS_CONFIG_PATH} -n ${NAMESPACE}
-                helm install prometheus prometheus-community/prometheus -f ${PROMETHEUS_CONFIG_PATH} -n ${NAMESPACE}
-                """
-                    } else {
-                        echo 'Prometheus is already installed.'
-                    }
-                }
-            }
-        }
-
         stage('Port Forward Prometheus to Local') {
             steps {
                 echo 'Port forwarding Prometheus to access metrics locally...'
-                sh 'kubectl port-forward svc/prometheus-server 9090:9090 -n ${NAMESPACE} &'
+                sh 'nohup kubectl port-forward --address 0.0.0.0 svc/prometheus-server 9090:9090 -n ${NAMESPACE} &'
             }
         }
 
