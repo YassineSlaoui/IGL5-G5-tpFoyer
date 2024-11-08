@@ -170,7 +170,7 @@ pipeline {
                     if (!nodeExporterInstalled) {
                         sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
                         sh 'helm repo update'
-                        sh 'helm install prometheus-node-exporter prometheus-community/prometheus-node-exporter -n monitoring --create-namespace'
+                        sh 'helm install prometheus-node-exporter prometheus-community/prometheus-node-exporter -n monitoring --create-namespace --set daemonset.enabled=true'
                         sh 'nohup kubectl port-forward --address 0.0.0.0 svc/prometheus-node-exporter 9100:9100 -n monitoring &'
                     } else {
                         echo 'Node Exporter is already installed in the monitoring namespace. Skipping installation.'
