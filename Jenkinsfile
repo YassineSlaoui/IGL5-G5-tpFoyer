@@ -182,77 +182,82 @@ pipeline {
         stage('Install Prometheus Operator') {
             steps {
                 script {
-                    // Add Prometheus Community Helm repository
-                    sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
-                    sh 'helm repo update'
+                    // Check if Prometheus Operator is already installed
+                    def prometheusOperatorInstalled = sh(script: "helm list -n ${NAMESPACE} | grep ${PROMETHEUS_OPERATOR_RELEASE_NAME}", returnStatus: true)
+                    if (prometheusOperatorInstalled != 0) {
+                        // Add Prometheus Community Helm repository
+                        sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts'
+                        sh 'helm repo update'
 
-                    // Install Prometheus Operator
-                    sh "helm install ${PROMETHEUS_OPERATOR_RELEASE_NAME} prometheus-community/kube-prometheus-stack -n ${NAMESPACE} --create-namespace"
+                        // Install Prometheus Operator
+                        sh "helm install ${PROMETHEUS_OPERATOR_RELEASE_NAME} prometheus-community/kube-prometheus-stack -n ${NAMESPACE} --create-namespace"
+                    } else {
+                        echo "Prometheus Operator is already installed in the ${NAMESPACE} namespace."
+                    }
+                }
+            }
+            stage('Configure Prometheus to Scrape EKS Node Metrics') {
+                steps {
+                    script {
+                        // Get the actual name of the Prometheus ConfigMap
+                        env.PROMETHEUS_CONFIG_MAP_NAME = sh(script: "kubectl -n ${NAMESPACE} get configmap | grep prometheus-k8s | awk '{print \$1}'", returnStdout: true).trim()
+
+                        // Edit the Prometheus ConfigMap to update the scrape configuration
+                        sh "kubectl -n ${NAMESPACE} edit configmap/${env.PROMETHEUS_CONFIG_MAP_NAME}"
+                    }
+                }
+            }
+
+            stage('Verify Prometheus Scraping') {
+                steps {
+                    script {
+                        // Port-forward the Prometheus service to access the web UI
+                        sh "kubectl -n ${NAMESPACE} port-forward service/prometheus-k8s 9090"
+                    }
+                }
+            }
+
+            stage('Visualize Metrics in Grafana') {
+                steps {
+                    script {
+                        // Port-forward the Grafana service to access the web UI
+                        sh "kubectl -n ${NAMESPACE} port-forward service/grafana 3000"
+                    }
                 }
             }
         }
 
-        stage('Configure Prometheus to Scrape EKS Node Metrics') {
-            steps {
-                script {
-                    // Get the actual name of the Prometheus ConfigMap
-                    env.PROMETHEUS_CONFIG_MAP_NAME = sh(script: "kubectl -n ${NAMESPACE} get configmap | grep prometheus-k8s | awk '{print \$1}'", returnStdout: true).trim()
-
-                    // Edit the Prometheus ConfigMap to update the scrape configuration
-                    sh "kubectl -n ${NAMESPACE} edit configmap/${env.PROMETHEUS_CONFIG_MAP_NAME}"
-                }
+        post {
+            always {
+                emailext attachLog: true,
+                        subject: "'${currentBuild.result}' - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "Project: ${env.JOB_NAME}<br/>" +
+                                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                                "URL: ${env.BUILD_URL}<br/>" +
+                                "Result: ${currentBuild.result}<br/>",
+                        to: 'moula.meriame@gmail.com',
+                        mimeType: 'text/html'
             }
-        }
-
-        stage('Verify Prometheus Scraping') {
-            steps {
-                script {
-                    // Port-forward the Prometheus service to access the web UI
-                    sh "kubectl -n ${NAMESPACE} port-forward service/prometheus-k8s 9090"
-                }
+            success {
+                emailext attachLog: true,
+                        subject: "SUCCESS - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "Project: ${env.JOB_NAME}<br/>" +
+                                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                                "URL: ${env.BUILD_URL}<br/>" +
+                                "Result: SUCCESS<br/>",
+                        to: 'moula.meriame@gmail.com',
+                        mimeType: 'text/html'
             }
-        }
-
-        stage('Visualize Metrics in Grafana') {
-            steps {
-                script {
-                    // Port-forward the Grafana service to access the web UI
-                    sh "kubectl -n ${NAMESPACE} port-forward service/grafana 3000"
-                }
+            failure {
+                emailext attachLog: true,
+                        subject: "FAILURE - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "Project: ${env.JOB_NAME}<br/>" +
+                                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                                "URL: ${env.BUILD_URL}<br/>" +
+                                "Result: FAILURE<br/>",
+                        to: 'moula.meriame@gmail.com',
+                        mimeType: 'text/html'
             }
-        }
-    }
-
-    post {
-        always {
-            emailext attachLog: true,
-                    subject: "'${currentBuild.result}' - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                    body: "Project: ${env.JOB_NAME}<br/>" +
-                            "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                            "URL: ${env.BUILD_URL}<br/>" +
-                            "Result: ${currentBuild.result}<br/>",
-                    to: 'moula.meriame@gmail.com',
-                    mimeType: 'text/html'
-        }
-        success {
-            emailext attachLog: true,
-                    subject: "SUCCESS - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                    body: "Project: ${env.JOB_NAME}<br/>" +
-                            "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                            "URL: ${env.BUILD_URL}<br/>" +
-                            "Result: SUCCESS<br/>",
-                    to: 'moula.meriame@gmail.com',
-                    mimeType: 'text/html'
-        }
-        failure {
-            emailext attachLog: true,
-                    subject: "FAILURE - Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                    body: "Project: ${env.JOB_NAME}<br/>" +
-                            "Build Number: ${env.BUILD_NUMBER}<br/>" +
-                            "URL: ${env.BUILD_URL}<br/>" +
-                            "Result: FAILURE<br/>",
-                    to: 'moula.meriame@gmail.com',
-                    mimeType: 'text/html'
         }
     }
 }
