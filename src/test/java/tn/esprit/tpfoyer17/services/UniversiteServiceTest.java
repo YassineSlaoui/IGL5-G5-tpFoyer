@@ -118,5 +118,6 @@ class UniversiteServiceTest {
         assertNotNull(result);
         verify(universiteRepository, times(1)).findById(1L);
         verify(universiteRepository, times(1)).save(universite);
+
     }
 }
