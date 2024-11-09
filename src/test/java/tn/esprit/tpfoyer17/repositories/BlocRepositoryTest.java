@@ -50,6 +50,5 @@ class BlocRepositoryTest {
 
         Optional<Bloc> optionalBloc = blocRepository.findByNomBloc("Bloc1");
         assertTrue(optionalBloc.isPresent());
-
     }
 }
