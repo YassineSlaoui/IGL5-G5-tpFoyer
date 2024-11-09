@@ -206,10 +206,10 @@ pipeline {
             }
         }
 
-        stage('Port Forward Prometheus to Local') {
+        stage('Port Forward Prometheus Node Exporter to Local') {
             steps {
                 echo 'Port forwarding Prometheus to access metrics locally...'
-                sh 'nohup kubectl port-forward --address 0.0.0.0 svc/prometheus-server 9090:9090 -n ${NAMESPACE} &'
+                sh 'nohup kubectl kubectl port-forward --address 0.0.0.0 svc/node-exporter-prometheus-node-exporter 9100:9100 -n ${NAMESPACE} &'
             }
         }
 
