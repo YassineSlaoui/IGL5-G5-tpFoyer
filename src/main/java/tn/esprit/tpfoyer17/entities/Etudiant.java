@@ -20,16 +20,15 @@ public class Etudiant implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
-    long idEtudiant;
+    private long idEtudiant;
 
-    String nomEtudiant;
+    private String nomEtudiant;
 
-    String prenomEtudiant;
+    private String prenomEtudiant;
 
-    long cinEtudiant;
+    private long cinEtudiant;
 
-    Date dateNaissance;
+    private Date dateNaissance;
 
     @ToString.Exclude
     @ManyToMany(mappedBy = "etudiants")

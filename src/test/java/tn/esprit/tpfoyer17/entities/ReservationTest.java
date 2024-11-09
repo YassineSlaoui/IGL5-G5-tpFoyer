@@ -12,31 +12,31 @@ class ReservationTest {
 
     @Test
     void getIdReservation() {
-        Reservation reservation = new Reservation();
-        assertNull(reservation.getIdReservation());
+        Reservation uneReservation = new Reservation();
+        assertNull(uneReservation.getIdReservation());
     }
 
     @Test
     void getAnneeUniversitaire() {
-        Reservation reservation = new Reservation();
+        Reservation uneReservation = new Reservation();
         Date date = new Date();
-        reservation.setAnneeUniversitaire(date);
-        assertEquals(date, reservation.getAnneeUniversitaire());
+        uneReservation.setAnneeUniversitaire(date);
+        assertEquals(date, uneReservation.getAnneeUniversitaire());
     }
 
     @Test
     void isEstValide() {
-        Reservation reservation = new Reservation();
-        reservation.setEstValide(true);
-        assertTrue(reservation.isEstValide());
+        Reservation uneReservation = new Reservation();
+        uneReservation.setEstValide(true);
+        assertTrue(uneReservation.isEstValide());
     }
 
     @Test
     void getEtudiants() {
         Reservation reservation = new Reservation();
-        Set<Etudiant> etudiants = new HashSet<>();
-        reservation.setEtudiants(etudiants);
-        assertEquals(etudiants, reservation.getEtudiants());
+        Set<Etudiant> etudiantHashSet = new HashSet<>();
+        reservation.setEtudiants(etudiantHashSet);
+        assertEquals(etudiantHashSet, reservation.getEtudiants());
     }
 
     @Test

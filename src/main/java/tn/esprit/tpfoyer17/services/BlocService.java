@@ -46,7 +46,7 @@ public class BlocService implements IBlocService{
 
     @Override
     public Bloc affecterChambresABloc(List<Long> numChambre, long idBloc) {
-        Bloc bloc = blocRepository.findById(idBloc).orElse(null);
+        Bloc bloc = blocRepository.findById(idBloc).orElseThrow();
         List<Chambre> chambres = (List<Chambre>) chambreRepository.findAllById(numChambre);
         for (Chambre chambre: chambres) {
             chambre.setBloc(bloc);

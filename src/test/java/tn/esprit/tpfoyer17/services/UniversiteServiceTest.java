@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 class UniversiteServiceTest {
 
     @Mock
@@ -33,7 +35,8 @@ class UniversiteServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        AutoCloseable autoCloseable = MockitoAnnotations.openMocks(this);
+        log.info("AutoCloseable: {}", autoCloseable);
     }
 
     @Test

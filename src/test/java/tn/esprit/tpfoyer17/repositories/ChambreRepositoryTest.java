@@ -16,18 +16,6 @@ class ChambreRepositoryTest {
     @Autowired
     private ChambreRepository chambreRepository;
 
-    @Autowired
-    private UniversiteRepository universiteRepository;
-
-    @Autowired
-    private FoyerRepository foyerRepository;
-
-    @Autowired
-    private BlocRepository blocRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
     @Test
     void findByBlocFoyerUniversiteNomUniversite() {
         List<Chambre> chambres = chambreRepository.findByBlocFoyerUniversiteNomUniversite("University1");

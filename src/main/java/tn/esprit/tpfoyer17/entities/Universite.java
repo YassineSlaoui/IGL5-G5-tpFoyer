@@ -18,14 +18,13 @@ public class Universite implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
-    long idUniversite;
+    private long idUniversite;
 
-    String nomUniversite;
+    private String nomUniversite;
 
-    String adresse;
+    private String adresse;
 
     @ToString.Exclude
     @OneToOne
-    Foyer foyer;
+    private Foyer foyer;
 }

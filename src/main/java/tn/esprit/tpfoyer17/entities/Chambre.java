@@ -21,18 +21,17 @@ public class Chambre implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
-    long idChambre;
+    private long idChambre;
 
-    long numeroChambre;
+    private long numeroChambre;
 
     @Enumerated(EnumType.STRING)
-    TypeChambre typeChambre;
+    private TypeChambre typeChambre;
 
     @JsonIgnore
     @ToString.Exclude
     @ManyToOne
-    Bloc bloc;
+    private Bloc bloc;
 
     @JsonIgnore
     @ToString.Exclude

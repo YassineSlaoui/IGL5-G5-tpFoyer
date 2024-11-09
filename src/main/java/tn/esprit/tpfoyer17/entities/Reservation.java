@@ -20,11 +20,11 @@ public class Reservation implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    String idReservation;
+    private String idReservation;
 
-    Date anneeUniversitaire;
+    private Date anneeUniversitaire;
 
-    boolean estValide;
+    private boolean estValide;
 
     @ToString.Exclude
     @ManyToMany

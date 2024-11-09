@@ -7,7 +7,6 @@ import tn.esprit.tpfoyer17.entities.Bloc;
 import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.entities.Universite;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,7 +37,7 @@ class BlocRepositoryTest {
         foyer.setUniversite(universite);
 
         // Save the Universite and Foyer
-        universite = universiteRepository.save(universite);
+        universiteRepository.save(universite);
         foyer = foyerRepository.save(foyer);
 
         // Create a Bloc
